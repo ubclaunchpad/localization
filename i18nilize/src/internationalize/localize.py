@@ -1,6 +1,6 @@
 import json
 
-def getJson(file_path):
+def get_json(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
     return data
@@ -8,8 +8,8 @@ def getJson(file_path):
 # Input: 
 #   - file_path: path of json file
 # Output: Token in json file
-def getToken(file_path):
-    data = getJson(file_path)
+def get_token(file_path):
+    data = get_json(file_path)
     token = data["Token"]
     return token
     
@@ -18,8 +18,8 @@ def getToken(file_path):
 #   - language: chosen language to translate to
 #   - word: chosen word to translate
 # Output: translated word based on chosen language
-def getTranslation(file_path, language, word):
-    data = getJson(file_path)
+def get_translation(file_path, language, word):
+    data = get_json(file_path)
     for translation in data["translations"]:
         if translation["language"] == language:
             new_word = translation.get(word)
