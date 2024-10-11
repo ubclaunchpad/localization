@@ -1,5 +1,6 @@
 import unittest
-from src.internationalize.localize import get_token, get_translation
+from src.internationalize.localize import get_translation
+from src.internationalize.helpers import get_token
 
 # run tests using python -m tests.test_read_file at i18nilize directory level
 
