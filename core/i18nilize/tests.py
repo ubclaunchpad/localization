@@ -29,7 +29,7 @@ class TokenViewTests(APITestCase):
         Ensure that a GET request retrieves an existing token
         """
         token = Token.objects.create()
-        retrieve_url = reverse('read-token', args=[token.id])
+        retrieve_url = reverse('read-token', args=[str(token.value)])
 
         response = self.client.get(retrieve_url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -41,7 +41,7 @@ class TokenViewTests(APITestCase):
         """
         Ensure that a GET request for a non-existent token returns a 404 error
         """
-        retrieve_url = reverse('read-token', args=[999]) # assuming 999 doesnt exist
+        retrieve_url = reverse('read-token', args=['nonexistentvalue'])
 
         response = self.client.get(retrieve_url, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

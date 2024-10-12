@@ -46,7 +46,7 @@ class TokenView(APIView):
             return Response({'error': 'Token value is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            token = Token.objects.get(pk=pk)
+            token = Token.objects.get(value=value)
             data = {
                 'id': token.id,
                 'value': str(token.value),
