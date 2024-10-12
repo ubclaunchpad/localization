@@ -24,6 +24,11 @@ class PostTranslations(APIView):
         received_data = request.data
         token = request.headers.get("Token")
 
+        # Check if token exists: import model
+        # Check if all translations are present in database, if not, add new translation
+            # If translation already exists and translation does match, return status code 400
+        # Return 201 status code
+
         response_data = {
             'message': 'Data received successfully!',
             'received_data': received_data,
@@ -31,3 +36,6 @@ class PostTranslations(APIView):
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
+    
+
+    # TODO: Patch request
