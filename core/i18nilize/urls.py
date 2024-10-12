@@ -1,9 +1,9 @@
 from django.urls import path
 from . import views
-from .views import CreateTokenView, ReadTokenView
+from .views import TokenView
 
 urlpatterns = [
     path("", views.SampleAPIView.as_view(), name="index"),
-    path('token/create/', CreateTokenView.as_view(), name='create-token'),
-    path('token/read/<int:pk>/', ReadTokenView.as_view(), name='read-token'),
+    path('token/', TokenView.as_view(), name='create-token'),
+    path('token/<int:pk>/', TokenView.as_view(), name='read-token'), 
 ]

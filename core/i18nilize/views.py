@@ -21,11 +21,15 @@ class SampleAPIView(APIView):
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
-class CreateTokenView(APIView):
+class TokenView(APIView):
     """
-    Endpoint to create a new token.
+    Endpoint to create a new token or retrieve a token by its ID.
     """
+
     def post(self, request):
+        """
+        Create a new token.
+        """
         token = Token.objects.create()
         data = {
             'id': token.id,
@@ -34,11 +38,13 @@ class CreateTokenView(APIView):
         }
         return Response(data, status=status.HTTP_201_CREATED)
 
-class ReadTokenView(APIView):
-    """
-    Endpoint to retrieve a token by its ID.
-    """
-    def get(self, request, pk):
+    def get(self, request, pk=None):
+        """
+        Retrieve a token by its ID.
+        """
+        if pk is None:
+            return Response({'error': 'Token ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
             token = Token.objects.get(pk=pk)
             data = {
