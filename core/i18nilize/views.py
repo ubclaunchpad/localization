@@ -38,12 +38,12 @@ class TokenView(APIView):
         }
         return Response(data, status=status.HTTP_201_CREATED)
 
-    def get(self, request, pk=None):
+    def get(self, request, value=None):
         """
-        Retrieve a token by its ID.
+        Retrieve a token by its value
         """
         if pk is None:
-            return Response({'error': 'Token ID is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Token value is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             token = Token.objects.get(pk=pk)
