@@ -41,7 +41,7 @@ class TokenViewTests(APITestCase):
         """
         Ensure that a GET request for a non-existent token returns a 404 error
         """
-        retrieve_url = reverse('read-token', args=['nonexistentvalue'])
+        retrieve_url = reverse('read-token', args=['123e4567-e89b-12d3-a456-426614174000']) #random uuid
 
         response = self.client.get(retrieve_url, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

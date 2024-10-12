@@ -42,7 +42,7 @@ class TokenView(APIView):
         """
         Retrieve a token by its value
         """
-        if pk is None:
+        if value is None:
             return Response({'error': 'Token value is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
