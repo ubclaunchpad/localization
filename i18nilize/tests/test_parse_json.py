@@ -2,10 +2,10 @@ import unittest, os, json
 from src.internationalize.helpers import get_json
 
 # Create your tests here.
-class JSONParseTestCase(unittest.TestCase):                
+class TestGetJson(unittest.TestCase):                
     def setUp(self):
         current_dir = os.path.dirname(__file__)
-        self.test_path = os.path.join(current_dir, 'test_json.json')
+        self.test_path = os.path.join(current_dir, 'resources/test_json.json')
 
     def test_get_json(self):
         data = get_json(self.test_path)
@@ -29,8 +29,9 @@ class JSONParseTestCase(unittest.TestCase):
     
     def test_invalid_json(self):
         current_dir = os.path.dirname(__file__)
-        self.test_path = os.path.join(current_dir, 'test_invalid_json.json')
+        self.test_path = os.path.join(current_dir, 'resources/test_invalid_json.json')
         with self.assertRaises(json.JSONDecodeError):
             get_json(self.test_path)
 
-unittest.main()
+if __name__ == '__main__':
+    unittest.main()
