@@ -16,3 +16,11 @@ def get_json(file_path):
         print(f"Error: {e}")
         raise e
     return data
+
+# Input: 
+#   - file_path: path of json file
+# Output: Token in json file
+def get_token(file_path):
+    data = get_json(file_path)
+    token = data["Token"]
+    return token
