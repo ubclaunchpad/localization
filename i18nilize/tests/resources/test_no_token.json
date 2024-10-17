@@ -1,0 +1,14 @@
+{
+    "translations": [
+        {
+            "language": "French",
+            "hello": "bonjour",
+            "No": "Non",
+            "Why": "pourquoi"
+        },
+        {
+            "language": "Spanish",
+            "hello": "Hola"
+        }
+    ]
+}
