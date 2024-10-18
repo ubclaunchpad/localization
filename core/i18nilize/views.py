@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Token
 import uuid
+import json
 
 # Create your views here.
 class SampleAPIView(APIView):
@@ -57,27 +58,64 @@ class TokenView(APIView):
             return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 class ProcessTranslationsView(APIView):
+    """
+    Endpoint to add or update translations.
+    """
+
+    """
+    Test Token
+    {
+        "id": 5,
+        "value": "c84234c3-b507-4ed0-a6eb-8b10116cdef1",
+        "created_at": "2024-10-18T03:44:00.547520+00:00"
+    }
+    """
     
-    # Check if token exists: import model
-    # Check if all translations are present in database, if not, add new translation
-        # If translation already exists and translation does match, return status code 400
-    # Return 201 status code
     def post(self, request, *args, **kwargs):
         """
         Adds new translations to database
         """
+        translations_data = request.data
+        token_id = request.headers.get("Token")
+
+        if not token_id:
+            return Response({'error': 'Token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not translations_data:
+            return Response({'error': 'Translations are required.'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        # Validate that token_id valid UUID
         try:
-            received_data = request.data
-            token_id = request.headers.get("Token")
+            uuid_obj = uuid.UUID(token_id, version=4)
+        except ValueError:
+            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
             token = Token.objects.get(value=token_id)
 
-            response_data = {
-                'message': 'Data received successfully!',
-                'received_data': received_data,
-                'received_token': token
-            }
+            if not self._validate_translations_data(translations_data):
+                return Response({'error': 'Invalid translations format.'}, status=status.HTTP_400_BAD_REQUEST)
+            
 
             return Response(response_data, status=status.HTTP_201_CREATED)
-            
+
         except Token.DoesNotExist:
             return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    def _validate_translations_data(self, translations_data):
+        """
+        Validates translation data structure
+        """
+
+        if "translations" not in translations_data:
+            return False
+
+        for translations in translations_data["translations"]:
+            if "language" not in translations:
+                return False
+
+            for key, value in translations.items():
+                if not isinstance(key, str) or not isinstance(value, str):
+                    return False
+        
+        return True
