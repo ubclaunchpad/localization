@@ -96,6 +96,8 @@ class ProcessTranslationsView(APIView):
             if not self._validate_translations_data(translations_data):
                 return Response({'error': 'Invalid translations format.'}, status=status.HTTP_400_BAD_REQUEST)
             
+            # TODO: check if all translations are not in DB, if so, add new translations
+            # self._add_translations()
 
             return Response(response_data, status=status.HTTP_201_CREATED)
 
@@ -119,3 +121,10 @@ class ProcessTranslationsView(APIView):
                     return False
         
         return True
+    
+    def _add_translations(self):
+        """
+        If all translations do not exist already, adds them.
+        If any translation exists, return False
+        """
+        pass
