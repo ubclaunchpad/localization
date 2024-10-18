@@ -1,5 +1,5 @@
 import unittest, os, json
-from src.internationalize.helpers import get_json
+from src.internationalize.helpers import get_json, make_translation_map, get_translation
 
 # Create your tests here.
 class TestGetJson(unittest.TestCase):                
@@ -56,6 +56,29 @@ class TestGetJson(unittest.TestCase):
         data = get_json(self.test_path)
         self.assertEqual(data['Token'], "85124f79-0829-4b80-8b5c-d52700d86e46")
         self.assertNotIn('translations', data, "No translations")
+
+    def test_translation_lookup(self):
+        current_dir = os.path.dirname(__file__)
+        self.test_path = os.path.join(current_dir, 'resources/test_json.json')
+        data = get_json(self.test_path)
+        self.translations_map = make_translation_map(data)
+        french_translation = get_translation(self.translations_map, 'French')
+        print("French Translation: ", french_translation)
+        self.assertEqual(french_translation['hello'], 'bonjour')
+        self.assertEqual(french_translation['No'], 'Non')
+        self.assertEqual(french_translation['Why'], 'pourquoi')
+
+        spanish_translation = get_translation(self.translations_map, 'Spanish')
+        print("Spanish Translation: ", spanish_translation)
+        self.assertEqual(spanish_translation['hello'], 'Hola')
+
+    def test_translation_lookup_nonexistent(self):
+        current_dir = os.path.dirname(__file__)
+        self.test_path = os.path.join(current_dir, 'resources/test_json.json')
+        data = get_json(self.test_path)
+        self.translations_map = make_translation_map(data)
+        korean_translation = get_translation(self.translations_map, 'Korean')
+        self.assertEqual(korean_translation, "Translation not found")
 
 if __name__ == '__main__':
     unittest.main()
