@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Token
+from .models import Token, Translation
 import uuid
 import json
 
@@ -122,9 +122,33 @@ class ProcessTranslationsView(APIView):
         
         return True
     
-    def _add_translations(self):
+    def _get_new_translations(self, translations_data, token):
         """
-        If all translations do not exist already, adds them.
-        If any translation exists, return False
+        Returns a set of translations to add to the database. If any translation
+        is being updated, returns False (use PATCH endpoint to make updates).
         """
-        pass
+        new_translations = set()
+        for translations in translations_data["translations"]:
+            language = translations["language"]
+            for original_word, translated_word in translations.items():
+                if original_word == "language":
+                    continue
+
+                try:
+                    translation = Translation.objects.get(
+                        token=token,
+                        original_word=original_word,
+                        language=language
+                    )
+
+                    # Translation exists and matches, skip
+                    if translation.translated_word == translated_word:
+                        continue
+
+                    # Translation exists and is being updated; use PATCH endpoint instead.
+                    return False
+
+                except Translation.DoesNotExist:
+                    new_translations.add((original_word, translated_word, language))
+        
+        return new_translations
