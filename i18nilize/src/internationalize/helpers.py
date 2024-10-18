@@ -24,3 +24,16 @@ def get_token(file_path):
     data = get_json(file_path)
     token = data["Token"]
     return token
+
+# make hashmap from translations
+def make_translation_map(data):
+    translations_map = {}
+    for translation in data.get('translations', []):
+        language = translation.get('language')
+        if language:
+            translations_map[language] = translation
+    return translations_map
+
+# get translations from hashmap given the language
+def get_translation(translations_map, language):
+    return translations_map.get(language, "Translation not found")

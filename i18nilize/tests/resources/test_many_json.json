@@ -1,0 +1,305 @@
+{
+	"Token": "85124f79-0829-4b80-8b5c-d52700d86e46",
+	"translations": [
+		{
+			"language": "French",
+			"hello": "bonjour",
+			"No": "Non",
+			"Why": "pourquoi"
+		},
+		{
+			"language": "Spanish",
+			"hello": "Hola",
+			"No": "No",
+			"Why": "¿Por qué?"
+		},
+		{
+			"language": "German",
+			"hello": "Hallo",
+			"No": "Nein",
+			"Why": "Warum"
+		},
+		{
+			"language": "Italian",
+			"hello": "Ciao",
+			"No": "No",
+			"Why": "Perché"
+		},
+		{
+			"language": "Portuguese",
+			"hello": "Olá",
+			"No": "Não",
+			"Why": "Por quê"
+		},
+		{
+			"language": "Dutch",
+			"hello": "Hallo",
+			"No": "Nee",
+			"Why": "Waarom"
+		},
+		{
+			"language": "Russian",
+			"hello": "Привет",
+			"No": "Нет",
+			"Why": "Почему"
+		},
+		{
+			"language": "Chinese",
+			"hello": "你好",
+			"No": "不",
+			"Why": "为什么"
+		},
+		{
+			"language": "Japanese",
+			"hello": "こんにちは",
+			"No": "いいえ",
+			"Why": "なぜ"
+		},
+		{
+			"language": "Korean",
+			"hello": "안녕하세요",
+			"No": "아니요",
+			"Why": "왜"
+		},
+		{
+			"language": "Arabic",
+			"hello": "مرحبا",
+			"No": "لا",
+			"Why": "لماذا"
+		},
+		{
+			"language": "Hindi",
+			"hello": "नमस्ते",
+			"No": "नहीं",
+			"Why": "क्यों"
+		},
+		{
+			"language": "Bengali",
+			"hello": "হ্যালো",
+			"No": "না",
+			"Why": "কেন"
+		},
+		{
+			"language": "Turkish",
+			"hello": "Merhaba",
+			"No": "Hayır",
+			"Why": "Neden"
+		},
+		{
+			"language": "Swedish",
+			"hello": "Hej",
+			"No": "Nej",
+			"Why": "Varför"
+		},
+		{
+			"language": "Finnish",
+			"hello": "Hei",
+			"No": "Ei",
+			"Why": "Miksi"
+		},
+		{
+			"language": "Greek",
+			"hello": "Γειά",
+			"No": "Όχι",
+			"Why": "Γιατί"
+		},
+		{
+			"language": "Danish",
+			"hello": "Hej",
+			"No": "Nej",
+			"Why": "Hvorfor"
+		},
+		{
+			"language": "Norwegian",
+			"hello": "Hallo",
+			"No": "Nei",
+			"Why": "Hvorfor"
+		},
+		{
+			"language": "Polish",
+			"hello": "Cześć",
+			"No": "Nie",
+			"Why": "Dlaczego"
+		},
+		{
+			"language": "Ukrainian",
+			"hello": "Привіт",
+			"No": "Ні",
+			"Why": "Чому"
+		},
+		{
+			"language": "Czech",
+			"hello": "Ahoj",
+			"No": "Ne",
+			"Why": "Proč"
+		},
+		{
+			"language": "Hungarian",
+			"hello": "Helló",
+			"No": "Nem",
+			"Why": "Miért"
+		},
+		{
+			"language": "Romanian",
+			"hello": "Salut",
+			"No": "Nu",
+			"Why": "De ce"
+		},
+		{
+			"language": "Thai",
+			"hello": "สวัสดี",
+			"No": "ไม่",
+			"Why": "ทำไม"
+		},
+		{
+			"language": "Vietnamese",
+			"hello": "Xin chào",
+			"No": "Không",
+			"Why": "Tại sao"
+		},
+		{
+			"language": "Indonesian",
+			"hello": "Halo",
+			"No": "Tidak",
+			"Why": "Mengapa"
+		},
+		{
+			"language": "Hebrew",
+			"hello": "שלום",
+			"No": "לא",
+			"Why": "למה"
+		},
+		{
+			"language": "Persian",
+			"hello": "سلام",
+			"No": "نه",
+			"Why": "چرا"
+		},
+		{
+			"language": "Urdu",
+			"hello": "ہیلو",
+			"No": "نہیں",
+			"Why": "کیوں"
+		},
+		{
+			"language": "Tamil",
+			"hello": "வணக்கம்",
+			"No": "இல்லை",
+			"Why": "ஏன்"
+		},
+		{
+			"language": "Telugu",
+			"hello": "హలో",
+			"No": "లేదు",
+			"Why": "ఎందుకు"
+		},
+		{
+			"language": "Marathi",
+			"hello": "नमस्कार",
+			"No": "नाही",
+			"Why": "का"
+		},
+		{
+			"language": "Gujarati",
+			"hello": "હેલો",
+			"No": "ના",
+			"Why": "શા માટે"
+		},
+		{
+			"language": "Malayalam",
+			"hello": "ഹലോ",
+			"No": "ഇല്ല",
+			"Why": "എന്തിനാണ്"
+		},
+		{
+			"language": "Punjabi",
+			"hello": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ",
+			"No": "ਨਹੀਂ",
+			"Why": "ਕਿਉਂ"
+		},
+		{
+			"language": "Burmese",
+			"hello": "မင်္ဂလာပါ",
+			"No": "မဟုတ်ဘူး",
+			"Why": "ဘာကြောင့်"
+		},
+		{
+			"language": "Swahili",
+			"hello": "Habari",
+			"No": "Hapana",
+			"Why": "Kwa nini"
+		},
+		{
+			"language": "Amharic",
+			"hello": "ሰላም",
+			"No": "አይ",
+			"Why": "ለምን"
+		},
+		{
+			"language": "Hausa",
+			"hello": "Sannu",
+			"No": "A'a",
+			"Why": "Me yasa"
+		},
+		{
+			"language": "Zulu",
+			"hello": "Sawubona",
+			"No": "Cha",
+			"Why": "Kungani"
+		},
+		{
+			"language": "Afrikaans",
+			"hello": "Hallo",
+			"No": "Nee",
+			"Why": "Hoekom"
+		},
+		{
+			"language": "Filipino",
+			"hello": "Kamusta",
+			"No": "Hindi",
+			"Why": "Bakit"
+		},
+		{
+			"language": "Nepali",
+			"hello": "नमस्ते",
+			"No": "होइन",
+			"Why": "किन"
+		},
+		{
+			"language": "Sinhala",
+			"hello": "හෙලෝ",
+			"No": "නැහැ",
+			"Why": "ඇයි"
+		},
+		{
+			"language": "Burmese",
+			"hello": "မင်္ဂလာပါ",
+			"No": "မဟုတ်ဘူး",
+			"Why": "ဘာကြောင့်"
+		},
+		{
+			"language": "Khmer",
+			"hello": "សួស្ដី",
+			"No": "ទេ",
+			"Why": "ហេតុអ្វី"
+		},
+		{
+			"language": "Lao",
+			"hello": "ສະບາຍດີ",
+			"No": "ບໍ່",
+			"Why": "ເປັນຫຍັງ"
+		},
+        {
+			"language": "Malay",
+			"hello": "Helo",
+			"No": "Tidak",
+			"Why": "Mengapa"
+		},
+        {
+			"language": "Tagalog",
+			"hello": "Kamusta",
+			"No": "Hindi",
+			"Why": "Bakit"
+		}
+	]
+}
