@@ -1,4 +1,4 @@
-import unittest, os, json
+import unittest, os, json, timeit
 from src.internationalize.helpers import get_json, make_translation_map, get_translation
 
 # Create your tests here.
@@ -79,6 +79,40 @@ class TestGetJson(unittest.TestCase):
         self.translations_map = make_translation_map(data)
         korean_translation = get_translation(self.translations_map, 'Korean')
         self.assertEqual(korean_translation, "Translation not found")
+
+    def test_translation_lookup_small(self):
+        current_dir = os.path.dirname(__file__)
+        self.test_path = os.path.join(current_dir, 'resources/test_json.json')
+        data = get_json(self.test_path)
+        self.translations_map = make_translation_map(data)
+
+        lookup_time = timeit.timeit(
+            stmt=lambda:get_translation(self.translations_map, 'French'),
+            number=1000
+        )
+
+        print("Lookup Time Small File:", lookup_time)
+        french_translation = get_translation(self.translations_map, 'French')
+        self.assertEqual(french_translation['hello'], 'bonjour')
+        self.assertEqual(french_translation['No'], 'Non')
+        self.assertEqual(french_translation['Why'], 'pourquoi')
+
+    def test_translation_lookup_big(self):
+        current_dir = os.path.dirname(__file__)
+        self.test_path = os.path.join(current_dir, 'resources/test_many_json.json')
+        data = get_json(self.test_path)
+        self.translations_map = make_translation_map(data)
+
+        lookup_time = timeit.timeit(
+            stmt=lambda:get_translation(self.translations_map, 'Tagalog'),
+            number=1000
+        )
+
+        print("Lookup Time Big File:", lookup_time)
+        tagalog_translation = get_translation(self.translations_map, 'Tagalog')
+        self.assertEqual(tagalog_translation['hello'], 'Kamusta')
+        self.assertEqual(tagalog_translation['No'], 'Hindi')
+        self.assertEqual(tagalog_translation['Why'], 'Bakit')
 
 if __name__ == '__main__':
     unittest.main()
