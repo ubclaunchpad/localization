@@ -55,3 +55,29 @@ class TokenView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         except Token.DoesNotExist:
             return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+class ProcessTranslationsView(APIView):
+    
+    # Check if token exists: import model
+    # Check if all translations are present in database, if not, add new translation
+        # If translation already exists and translation does match, return status code 400
+    # Return 201 status code
+    def post(self, request, *args, **kwargs):
+        """
+        Adds new translations to database
+        """
+        try:
+            received_data = request.data
+            token_id = request.headers.get("Token")
+            token = Token.objects.get(value=token_id)
+
+            response_data = {
+                'message': 'Data received successfully!',
+                'received_data': received_data,
+                'received_token': token
+            }
+
+            return Response(response_data, status=status.HTTP_201_CREATED)
+            
+        except Token.DoesNotExist:
+            return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
