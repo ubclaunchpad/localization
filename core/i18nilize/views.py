@@ -72,12 +72,12 @@ class ProcessTranslationsView(APIView):
 
         if not token_uuid:
             return error_response('Token is required.', 400)
-        
-        if not translations_data:
-            return error_response('Translations are required.', 400)
-            
+
         if not is_valid_uuid(token_uuid):
             return error_response('Invalid token.', 400)
+        
+        if not translations_data:
+            return error_response('Translations data is required.', 400)
 
         try:
             token = Token.objects.get(value=token_uuid)
@@ -92,10 +92,16 @@ class ProcessTranslationsView(APIView):
             success, added_count = bulk_create_translations(token, new_translations)
             if not success:
                 return error_response('An error occurred while inserting new translations.', 500)
+            
+            if added_count == 0:
+                return success_response({
+                'message': 'No new translations to add.',
+                'added_count': added_count,
+            }, 200)
 
             return success_response({
-                "message": "All translations created successfully.",
-                "added_count": added_count,
+                'message': 'All translations created successfully.',
+                'added_count': added_count,
             }, 201)
         except Token.DoesNotExist:
             return error_response('Token not found.', 404)
