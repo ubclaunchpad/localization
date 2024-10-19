@@ -89,11 +89,9 @@ class ProcessTranslationsView(APIView):
             if new_translations is False:
                 return error_response('Use a PATCH request to make updates to translations.', 400)
             
-            result = bulk_create_translations(token, new_translations)
-            if not result:
+            success = bulk_create_translations(token, new_translations)
+            if not success:
                 return error_response('An error occurred while inserting new translations.', 500)
-            
-            all_translations = Translation.objects.all()
 
             return success_response({"message": "All translations created successfully."}, 201)
         except Token.DoesNotExist:
