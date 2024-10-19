@@ -3,6 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Token, Translation
+from .utils.translation_utils import *
+from .utils.utils import *
 import uuid
 import json
 
@@ -61,94 +63,38 @@ class ProcessTranslationsView(APIView):
     """
     Endpoint to add or update translations.
     """
-
-    """
-    Test Token
-    {
-        "id": 5,
-        "value": "c84234c3-b507-4ed0-a6eb-8b10116cdef1",
-        "created_at": "2024-10-18T03:44:00.547520+00:00"
-    }
-    """
-    
     def post(self, request, *args, **kwargs):
         """
         Adds new translations to database
         """
         translations_data = request.data
-        token_id = request.headers.get("Token")
+        token_uuid = request.headers.get('Token')
 
-        if not token_id:
-            return Response({'error': 'Token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not token_uuid:
+            return error_response('Token is required.', 400)
         
         if not translations_data:
-            return Response({'error': 'Translations are required.'}, status=status.HTTP_400_BAD_REQUEST)
+            return error_response('Translations are required.', 400)
             
-        # Validate that token_id valid UUID
-        try:
-            uuid_obj = uuid.UUID(token_id, version=4)
-        except ValueError:
-            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not is_valid_uuid(token_uuid):
+            return error_response('Invalid token.', 400)
 
         try:
-            token = Token.objects.get(value=token_id)
+            token = Token.objects.get(value=token_uuid)
 
-            if not self._validate_translations_data(translations_data):
-                return Response({'error': 'Invalid translations format.'}, status=status.HTTP_400_BAD_REQUEST)
+            if not validate_translations_data(translations_data):
+                return error_response('Translations are improperly formatted.', 400)
             
-            # TODO: check if all translations are not in DB, if so, add new translations
-            # self._add_translations()
+            new_translations = get_new_translations(translations_data, token)
+            if new_translations is False:
+                return error_response('Use a PATCH request to make updates to translations.', 400)
+            
+            result = bulk_create_translations(token, new_translations)
+            if not result:
+                return error_response('An error occurred while inserting new translations.', 500)
+            
+            all_translations = Translation.objects.all()
 
-            return Response(response_data, status=status.HTTP_201_CREATED)
-
+            return success_response({"message": "All translations created successfully."}, 201)
         except Token.DoesNotExist:
-            return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-    def _validate_translations_data(self, translations_data):
-        """
-        Validates translation data structure
-        """
-
-        if "translations" not in translations_data:
-            return False
-
-        for translations in translations_data["translations"]:
-            if "language" not in translations:
-                return False
-
-            for key, value in translations.items():
-                if not isinstance(key, str) or not isinstance(value, str):
-                    return False
-        
-        return True
-    
-    def _get_new_translations(self, translations_data, token):
-        """
-        Returns a set of translations to add to the database. If any translation
-        is being updated, returns False (use PATCH endpoint to make updates).
-        """
-        new_translations = set()
-        for translations in translations_data["translations"]:
-            language = translations["language"]
-            for original_word, translated_word in translations.items():
-                if original_word == "language":
-                    continue
-
-                try:
-                    translation = Translation.objects.get(
-                        token=token,
-                        original_word=original_word,
-                        language=language
-                    )
-
-                    # Translation exists and matches, skip
-                    if translation.translated_word == translated_word:
-                        continue
-
-                    # Translation exists and is being updated; use PATCH endpoint instead.
-                    return False
-
-                except Translation.DoesNotExist:
-                    new_translations.add((original_word, translated_word, language))
-        
-        return new_translations
+            return error_response('Token not found.', 404)
