@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Token, Translation
-from .utils.translation_utils import *
-from .utils.utils import *
+from .services.translation_processor import *
+from .utils import *
 import uuid
 import json
 
