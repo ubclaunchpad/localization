@@ -1,11 +1,11 @@
 import uuid
 
-def is_valid_uuid(uuid_to_test, version=4):
+def is_valid_uuid(uuid_string, version=4):
     """
-    Checks that UUID is valid
+    Checks that a string is a valid UUID
     """
     try:
-        uuid_obj = uuid.UUID(uuid_to_test, version=version)
+        uuid_obj = uuid.UUID(uuid_string, version=version)
         return True
     except ValueError:
         return False
