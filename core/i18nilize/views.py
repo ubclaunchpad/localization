@@ -63,7 +63,7 @@ class ProcessTranslationsView(APIView):
     """
     Endpoint to add or update translations.
     """
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         """
         Adds new translations to database
         """
@@ -89,10 +89,16 @@ class ProcessTranslationsView(APIView):
             if new_translations is False:
                 return error_response('Use a PATCH request to make updates to translations.', 400)
             
-            success = bulk_create_translations(token, new_translations)
+            success, added_count = bulk_create_translations(token, new_translations)
             if not success:
                 return error_response('An error occurred while inserting new translations.', 500)
 
-            return success_response({"message": "All translations created successfully."}, 201)
+            return success_response({
+                "message": "All translations created successfully.",
+                "added_count": added_count,
+            }, 201)
         except Token.DoesNotExist:
             return error_response('Token not found.', 404)
+
+    def patch(self, request):
+        pass

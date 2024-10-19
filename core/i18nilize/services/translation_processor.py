@@ -100,8 +100,8 @@ def bulk_create_translations(token, new_translations):
     try:
         with transaction.atomic():
             Translation.objects.bulk_create(bulk_translations)
-        return True
+        return True, len(bulk_translations)
     except Exception as e:
         print(e)
-        return False
+        return False, 0
     
