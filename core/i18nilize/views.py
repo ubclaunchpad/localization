@@ -71,40 +71,46 @@ class ProcessTranslationsView(APIView):
         token_uuid = request.headers.get('Token')
 
         if not token_uuid:
-            return error_response('Token is required.', 400)
+            return Response({'error': 'Token is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not is_valid_uuid(token_uuid):
-            return error_response('Invalid token.', 400)
+            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
         
         if not translations_data:
-            return error_response('Translations data is required.', 400)
+            return Response({'error': 'Translations data is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             token = Token.objects.get(value=token_uuid)
 
             if not validate_translations_data(translations_data):
-                return error_response('Translations are improperly formatted.', 400)
+                return Response(
+                    {'error': 'Translations are improperly formatted.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
             new_translations = get_new_translations(translations_data, token)
             if new_translations is False:
-                return error_response('Use a PATCH request to make updates to translations.', 400)
+                return Response(
+                    {'error': 'Use a PATCH request to make updates to translations.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             
             success, added_count = bulk_create_translations(token, new_translations)
             if not success:
-                return error_response('An error occurred while inserting new translations.', 500)
+                return Response(
+                    {'error': 'An error occurred while inserting new translations.'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
             
             if added_count == 0:
-                return success_response({
-                'message': 'No new translations to add.',
-                'added_count': added_count,
-            }, 200)
+                return Response(
+                    {'message': 'No new translations to add.', 'added_count': added_count},
+                    status=status.HTTP_200_OK
+                )
 
-            return success_response({
-                'message': 'All translations created successfully.',
-                'added_count': added_count,
-            }, 201)
+            return Response(
+                {'message': 'All translations created successfully.', 'added_count': added_count},
+                status=status.HTTP_201_CREATED
+            )
         except Token.DoesNotExist:
             return error_response('Token not found.', 404)
-
-    def patch(self, request):
-        pass
