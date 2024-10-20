@@ -113,4 +113,4 @@ class ProcessTranslationsView(APIView):
                 status=status.HTTP_201_CREATED
             )
         except Token.DoesNotExist:
-            return error_response('Token not found.', 404)
+            return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
