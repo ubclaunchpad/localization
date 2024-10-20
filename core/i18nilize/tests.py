@@ -2,7 +2,8 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from .models import Token
+from .models import Token, Translation
+from .services.translation_processor import bulk_create_translations
 
 # Create your tests here.
 class TokenViewTests(APITestCase):
@@ -220,3 +221,19 @@ class ProcessTranslationsViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['message'], 'All translations created successfully.')
         self.assertEqual(response.data['added_count'], 1)
+    
+    def test_create_bulk_translations_rollback(self):
+        """
+        Tests atomic transaction to rollback changes.
+        """
+        invalid_translations = [
+            ("hello", "hola", "spanish"),
+            ("bye", "chau", "spanish"),
+            ("another_word", None, "spanish")
+        ]
+        token = Token.objects.get(value=self.TEST_TOKEN)
+        success, added_count = bulk_create_translations(token, invalid_translations)
+        self.assertEqual(success, False)
+        self.assertEqual(added_count, 0)
+        translations = Translation.objects.all()
+        self.assertEqual(len(translations), 0)
