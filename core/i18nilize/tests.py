@@ -62,6 +62,20 @@ class ProcessTranslationsViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Token is required.')
     
+    def test_token_does_not_exist(self):
+        translations_data = {
+            'translations': [{
+                'language': 'spanish',
+                'hello': 'hola',
+            }]
+        }
+        headers = {
+            'HTTP_Token': 'c84234c3-b507-4ed0-a6eb-8b10116cdef1'
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['error'], 'Token not found.')
+    
     def test_no_translations_data(self):
         translations_data = {}
         headers = {
