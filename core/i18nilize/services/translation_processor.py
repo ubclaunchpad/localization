@@ -5,6 +5,7 @@ from ..models import Translation
 Utility functions for translation file processing.
 """
 
+
 def validate_translations_data(translations_data):
     """
     Light validation of translation file structure and format
@@ -22,6 +23,7 @@ def validate_translations_data(translations_data):
 
     return True
 
+
 def get_new_translations(translations_data, token):
     """
     Returns a set of translations to add to the database. If any translation already
@@ -29,7 +31,18 @@ def get_new_translations(translations_data, token):
     """
     translations_set, languages_set = extract_translations(translations_data)
     existing_translations = fetch_existing_translations(token, translations_set, languages_set)
-    return compare_translations(translations_set, existing_translations)
+    return get_post_translations(translations_set, existing_translations)
+
+
+def get_updated_translations(translations_data, token):
+    """
+    Returns a set of translations to update in the database. If there are any new translations
+    in the translations list, returns False (use POST endpoint to make new translations instead).
+    """
+    translations_set, languages_set = extract_translations(translations_data)
+    existing_translations = fetch_existing_translations(token, translations_set, languages_set)
+    return get_patch_translations(translations_set, existing_translations)
+
 
 def extract_translations(translations_data):
     """
@@ -48,6 +61,7 @@ def extract_translations(translations_data):
 
     return translations_set, languages_set
 
+
 def fetch_existing_translations(token, translations_set, languages_set):
     """
     Fetches existing translations from database in bulk to reduce number of queries.
@@ -63,7 +77,8 @@ def fetch_existing_translations(token, translations_set, languages_set):
     }
     return existing_translations
 
-def compare_translations(translations_set, existing_translations):
+
+def get_post_translations(translations_set, existing_translations):
     """
     Compares translations received in request with translations in database.
     If a translation already exists and is being updated, return False.
@@ -81,6 +96,26 @@ def compare_translations(translations_set, existing_translations):
             new_translations.append((original_word, translated_word, language))
     return new_translations
 
+
+def get_patch_translations(translations_set, existing_translations):
+    """
+    Compares translations received in request with translations in database.
+    If a translation already exists and is being updated, return False.
+    Otherwise, returns a list of new translations to add to database.
+    """
+    new_translations = []
+
+    for original_word, translated_word, language in translations_set:
+        key = (original_word, language)
+        if key in existing_translations:
+            if existing_translations[key] != translated_word:
+                new_translations.append((original_word, translated_word, language))
+        else:
+            return False
+
+    return new_translations
+
+
 def bulk_create_translations(token, new_translations):
     """
     Adds new translations to the database with an atomic transaction.
@@ -88,15 +123,14 @@ def bulk_create_translations(token, new_translations):
     will be unchanged.
     """
     bulk_translations = [
-            Translation(
-                token=token,
-                original_word=original_word,
-                translated_word=translated_word,
-                language=language,
-            )
-            for original_word, translated_word, language in new_translations
+        Translation(
+            token=token,
+            original_word=original_word,
+            translated_word=translated_word,
+            language=language,
+        )
+        for original_word, translated_word, language in new_translations
     ]
-
     try:
         with transaction.atomic():
             Translation.objects.bulk_create(bulk_translations)
@@ -104,4 +138,28 @@ def bulk_create_translations(token, new_translations):
     except Exception as e:
         print(e)
         return False, 0
-    
+
+
+def bulk_update_translations(token, updated_translations):
+    """
+    Update translations in the database with an atomic transaction.
+    Rollback previous updates if any fail.
+    """
+    try:
+        updated_rows = []
+        with transaction.atomic():
+
+            for translation in updated_translations:
+                print(translation)
+                row = Translation.objects.filter(token=token, original_word=translation[0], language=translation[2])
+                row.update(translated_word=translation[1])
+                updated_rows.append(row)
+
+            print(updated_rows)
+            print("bulk update?")
+            Translation.objects.bulk_update(updated_rows, ["translated_word"])
+            print("bulk update worked i think")
+        return True, len(updated_rows)
+    except Exception as e:
+        print(e)
+        return False, 0

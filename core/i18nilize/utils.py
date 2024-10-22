@@ -1,5 +1,6 @@
 import uuid
 
+
 def is_valid_uuid(uuid_string, version=4):
     """
     Checks that a string is a valid UUID

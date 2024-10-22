@@ -3,8 +3,7 @@ from . import views
 from .views import TokenView
 
 urlpatterns = [
-    path("", views.SampleAPIView.as_view(), name="index"),
     path('token/', TokenView.as_view(), name='create-token'),
-    path('token/<str:value>/', TokenView.as_view(), name='read-token'), 
+    path('token/<str:value>/', TokenView.as_view(), name='read-token'),
     path('translations', views.ProcessTranslationsView.as_view(), name='process-translations')
 ]

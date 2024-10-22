@@ -5,11 +5,12 @@ from rest_framework.test import APITestCase
 from .models import Token, Translation
 from .services.translation_processor import bulk_create_translations
 
+
 # Create your tests here.
 class TokenViewTests(APITestCase):
 
     def setUp(self):
-        self.create_url = reverse('create-token') 
+        self.create_url = reverse('create-token')
 
     def test_create_token(self):
         """
@@ -42,11 +43,12 @@ class TokenViewTests(APITestCase):
         """
         Ensure that a GET request for a non-existent token returns a 404 error
         """
-        retrieve_url = reverse('read-token', args=['123e4567-e89b-12d3-a456-426614174000']) #random uuid
+        retrieve_url = reverse('read-token', args=['123e4567-e89b-12d3-a456-426614174000'])  # random uuid
 
         response = self.client.get(retrieve_url, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['error'], 'Token not found.')
+
 
 class ProcessTranslationsViewTests(APITestCase):
 
@@ -61,7 +63,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Token is required.')
-    
+
     def test_token_does_not_exist(self):
         translations_data = {
             'translations': [{
@@ -75,7 +77,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data, **headers)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['error'], 'Token not found.')
-    
+
     def test_no_translations_data(self):
         translations_data = {}
         headers = {
@@ -84,7 +86,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data, **headers)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Translations data is required.')
-    
+
     def test_invalid_token(self):
         translations_data = {
             'translations': []
@@ -95,7 +97,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data, **headers)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Invalid token.')
-    
+
     def test_missing_translations_key(self):
         translations_data = {
             'language': 'spanish',
@@ -107,7 +109,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data, **headers)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Translations are improperly formatted.')
-    
+
     def test_non_string_keys(self):
         translations_data = {
             'translations': [{
@@ -121,7 +123,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data, **headers)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Translations are improperly formatted.')
-    
+
     def test_non_string_values(self):
         translations_data = {
             'translations': [{
@@ -135,7 +137,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data, **headers)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Translations are improperly formatted.')
-    
+
     def test_missing_language_key(self):
         translations_data = {
             'translations': [{
@@ -149,7 +151,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data, **headers)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Translations are improperly formatted.')
-    
+
     def test_updating_translation(self):
         translations_data = {
             'translations': [{
@@ -170,7 +172,7 @@ class ProcessTranslationsViewTests(APITestCase):
         response = self.client.post(reverse('process-translations'), translations_data_updated, **headers, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data['error'], 'Use a PATCH request to make updates to translations.')
-    
+
     def test_add_translations(self):
         translations_data = {
             'translations': [
@@ -195,7 +197,7 @@ class ProcessTranslationsViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['message'], 'All translations created successfully.')
         self.assertEqual(response.data['added_count'], 3)
-    
+
     def test_no_new_additions(self):
         translations_data = {
             'translations': [
@@ -213,7 +215,7 @@ class ProcessTranslationsViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['message'], 'No new translations to add.')
         self.assertEqual(response.data['added_count'], 0)
-    
+
     def test_duplicate_additions(self):
         translations_data = {
             'translations': [
@@ -235,7 +237,7 @@ class ProcessTranslationsViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['message'], 'All translations created successfully.')
         self.assertEqual(response.data['added_count'], 1)
-    
+
     def test_create_bulk_translations_rollback(self):
         """
         Tests atomic transaction to rollback changes.
