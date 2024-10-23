@@ -19,10 +19,18 @@ def get_json(file_path):
 
 # Get rid of the hard coded path
 def add_language(language):
-    data = get_json('resources/languages.json')
-    if language not in data['translations']:
-        data['translations'][language] = {}
-        json.dump(data, 'resources/languages.json')
+    data = get_json('i18nilize/src/internationalize/resources/languages.json')
+    translations = data.get('translations', [])
+
+    # Check if the language already exists in the translations list
+    if not any(t.get('language') == language for t in translations):
+        # Add new language as a dictionary in the list
+        new_language = {"language": language}
+        translations.append(new_language)
+        data['translations'] = translations
+
+        with open('i18nilize/src/internationalize/resources/languages.json', 'w') as file:
+            json.dump(data, file, indent=4)
         print("Language added!")
     else:
         print("Language is already added.")

@@ -1,6 +1,7 @@
 #from src.internationalize.helpers import add_language
 import json
 import argparse
+from i18nilize.src.internationalize.helpers import get_json, add_language
 
 # Function to parse json file, given its path
 def get_json(file_path):
