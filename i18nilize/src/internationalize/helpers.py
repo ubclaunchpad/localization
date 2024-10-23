@@ -1,5 +1,8 @@
 import json
 
+# Should this be removed?
+DEFAULT_PATH = 'i18nilize/src/internationalize/resources/languages.json'
+
 # Function to parse json file, given its path
 def get_json(file_path):
     try:
@@ -17,9 +20,9 @@ def get_json(file_path):
         raise e
     return data
 
-# Get rid of the hard coded path
+# Adds a language to the default JSON file
 def add_language(language):
-    data = get_json('i18nilize/src/internationalize/resources/languages.json')
+    data = get_json(DEFAULT_PATH)
     translations = data.get('translations', [])
 
     # Check if the language already exists in the translations list
@@ -29,11 +32,9 @@ def add_language(language):
         translations.append(new_language)
         data['translations'] = translations
 
-        with open('i18nilize/src/internationalize/resources/languages.json', 'w') as file:
+        # open and write
+        with open(DEFAULT_PATH, 'w') as file:
             json.dump(data, file, indent=4)
-        print("Language added!")
-    else:
-        print("Language is already added.")
 
 # Input: 
 #   - file_path: path of json file
