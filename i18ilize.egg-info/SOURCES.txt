@@ -1,0 +1,7 @@
+README.md
+setup.py
+i18ilize.egg-info/PKG-INFO
+i18ilize.egg-info/SOURCES.txt
+i18ilize.egg-info/dependency_links.txt
+i18ilize.egg-info/entry_points.txt
+i18ilize.egg-info/top_level.txt

@@ -17,6 +17,16 @@ def get_json(file_path):
         raise e
     return data
 
+# Get rid of the hard coded path
+def add_language(language):
+    data = get_json('resources/languages.json')
+    if language not in data['translations']:
+        data['translations'][language] = {}
+        json.dump(data, 'resources/languages.json')
+        print("Language added!")
+    else:
+        print("Language is already added.")
+
 # Input: 
 #   - file_path: path of json file
 # Output: Token in json file
