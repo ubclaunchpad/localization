@@ -26,7 +26,12 @@ jobs:
         cd core
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Run Tests
+    - name: Run Django Tests
       run: |
         cd core
         python manage.py test
+    - name: Run PIP Tests
+      run: |
+        cd i18nilize
+        python3 -m tests.test_read_file
+        python3 -m tests.test_parse_json
