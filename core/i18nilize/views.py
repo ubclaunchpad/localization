@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Token
-from .services.translation_processor import *
-from .utils import *
+from i18nilize.utils import is_valid_uuid
+from i18nilize.services import translation_processor as tp
 
 
 class TokenView(APIView):
@@ -67,20 +67,20 @@ class ProcessTranslationsView(APIView):
         try:
             token = Token.objects.get(value=token_uuid)
 
-            if not validate_translations_data(translations_data):
+            if not tp.validate_translations_data(translations_data):
                 return Response(
                     {'error': 'Translations are improperly formatted.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            new_translations = get_new_translations(translations_data, token)
+            new_translations = tp.get_new_translations(translations_data, token)
             if new_translations is False:
                 return Response(
                     {'error': 'Use a PATCH request to make updates to translations.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            success, added_count = bulk_create_translations(token, new_translations)
+            success, added_count = tp.bulk_create_translations(token, new_translations)
             if not success:
                 return Response(
                     {'error': 'An error occurred while inserting new translations.'},
@@ -119,15 +119,20 @@ class ProcessTranslationsView(APIView):
         try:
             token = Token.objects.get(value=token_uuid)
 
-            if not validate_translations_data(translations_data):
+            if not tp.validate_translations_data(translations_data):
                 return Response(
                     {'error': 'Translations are improperly formatted.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            updated_translations = get_updated_translations(translations_data, token)
+            updated_translations = tp.get_updated_translations(translations_data, token)
+            if updated_translations is False:
+                return Response(
+                    {'error': 'Use a POST request to make new translations.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-            success, updated_count = bulk_update_translations(token, updated_translations)
+            success, updated_count = tp.bulk_update_translations(token, updated_translations)
             if not success:
                 return Response(
                     {'error': 'An error occurred while updating translations.'},

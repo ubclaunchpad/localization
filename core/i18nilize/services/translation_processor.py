@@ -146,20 +146,13 @@ def bulk_update_translations(token, updated_translations):
     Rollback previous updates if any fail.
     """
     try:
-        updated_rows = []
         with transaction.atomic():
+            for original_word, translated_word, language in updated_translations:
+                row = Translation.objects.get(token=token, original_word=original_word, language=language)
+                row.translated_word = translated_word
+                row.save()
 
-            for translation in updated_translations:
-                print(translation)
-                row = Translation.objects.filter(token=token, original_word=translation[0], language=translation[2])
-                row.update(translated_word=translation[1])
-                updated_rows.append(row)
-
-            print(updated_rows)
-            print("bulk update?")
-            Translation.objects.bulk_update(updated_rows, ["translated_word"])
-            print("bulk update worked i think")
-        return True, len(updated_rows)
+        return True, len(updated_translations)
     except Exception as e:
         print(e)
         return False, 0

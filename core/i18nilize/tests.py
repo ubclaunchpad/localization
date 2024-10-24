@@ -1,12 +1,10 @@
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .models import Token, Translation
-from .services.translation_processor import bulk_create_translations
+from .services.translation_processor import bulk_create_translations, bulk_update_translations
 
 
-# Create your tests here.
 class TokenViewTests(APITestCase):
 
     def setUp(self):
@@ -213,7 +211,7 @@ class ProcessTranslationsViewTests(APITestCase):
         self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
         response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['message'], 'No new translations to add.')
+        self.assertEqual(response.data['message'], 'All translations created successfully.')
         self.assertEqual(response.data['added_count'], 0)
 
     def test_duplicate_additions(self):
@@ -240,7 +238,7 @@ class ProcessTranslationsViewTests(APITestCase):
 
     def test_create_bulk_translations_rollback(self):
         """
-        Tests atomic transaction to rollback changes.
+        Tests atomic transaction in post to rollback changes.
         """
         invalid_translations = [
             ("hello", "hola", "spanish"),
@@ -249,6 +247,81 @@ class ProcessTranslationsViewTests(APITestCase):
         ]
         token = Token.objects.get(value=self.TEST_TOKEN)
         success, added_count = bulk_create_translations(token, invalid_translations)
+        self.assertEqual(success, False)
+        self.assertEqual(added_count, 0)
+        translations = Translation.objects.all()
+        self.assertEqual(len(translations), 0)
+
+    def test_patch_translation_valid(self):
+        """
+        Test patch endpoint with one updated translation.
+        """
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola',
+                },
+                {
+                    'language': 'french',
+                    'hello': 'bonjour',
+                    'goodbye': 'adieu',
+                }
+            ]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        modified_translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola2',
+                },
+                {
+                    'language': 'french',
+                    'hello': 'pizza',
+                }
+            ]
+        }
+        response = self.client.patch(reverse('process-translations'), modified_translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['message'], 'All translations updated successfully.')
+        self.assertEqual(response.data['updated_count'], 2)
+
+    def test_patch_extra_translation(self):
+        """
+        Tests when user attempts to add a new translation using patch endpoint.
+        """
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola',
+                },
+            ]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.patch(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Use a POST request to make new translations.')
+
+    def test_update_translations_rollback(self):
+        """
+        Tests atomic transaction in patch to rollback changes.
+        """
+        invalid_translations = [
+            ("hello", "hola", "spanish"),
+            ("bye", "chau", "spanish"),
+            ("another_word", None, "spanish")
+        ]
+        token = Token.objects.get(value=self.TEST_TOKEN)
+        success, added_count = bulk_update_translations(token, invalid_translations)
         self.assertEqual(success, False)
         self.assertEqual(added_count, 0)
         translations = Translation.objects.all()
