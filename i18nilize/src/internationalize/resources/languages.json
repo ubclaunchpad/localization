@@ -10,12 +10,6 @@
         {
             "language": "Spanish",
             "hello": "Hola"
-        },
-        {
-            "language": "Japanese"
-        },
-        {
-            "language": "Mandarin"
         }
     ]
 }
