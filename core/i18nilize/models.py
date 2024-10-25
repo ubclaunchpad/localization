@@ -9,3 +9,9 @@ class Token(models.Model):
 
     def __str__(self):
         return str(self.value)
+
+class Translation(models.Model):
+    token = models.ForeignKey(Token, on_delete=models.CASCADE)
+    original_word = models.CharField(max_length = 255)
+    translated_word = models.CharField(max_length = 255)
+    language = models.CharField(max_length = 255)
