@@ -23,6 +23,9 @@ def get_json(file_path):
 
 # Adds a language to the default JSON file
 def add_language(language):
+    # filename = f"{language.lower()}.json"
+    # file_path = os.path.join('i18nilize/src/internationalize/resources', filename)
+
     data = get_json(DEFAULT_PATH)
     translations = data.get('translations', [])
 
