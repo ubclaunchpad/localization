@@ -1,14 +1,14 @@
-from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from .models import Token
+from .models import Token, Translation
+from .services.translation_processor import bulk_create_translations, bulk_update_translations
 
-# Create your tests here.
+
 class TokenViewTests(APITestCase):
 
     def setUp(self):
-        self.create_url = reverse('create-token') 
+        self.create_url = reverse('create-token')
 
     def test_create_token(self):
         """
@@ -41,8 +41,288 @@ class TokenViewTests(APITestCase):
         """
         Ensure that a GET request for a non-existent token returns a 404 error
         """
-        retrieve_url = reverse('read-token', args=['123e4567-e89b-12d3-a456-426614174000']) #random uuid
+        retrieve_url = reverse('read-token', args=['123e4567-e89b-12d3-a456-426614174000'])  # random uuid
 
         response = self.client.get(retrieve_url, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['error'], 'Token not found.')
+
+
+class ProcessTranslationsViewTests(APITestCase):
+
+    def setUp(self):
+        token = Token.objects.create()
+        self.TEST_TOKEN = str(token.value)
+
+    def test_no_token(self):
+        translations_data = {
+            'translations': []
+        }
+        response = self.client.post(reverse('process-translations'), translations_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Token is required.')
+
+    def test_token_does_not_exist(self):
+        translations_data = {
+            'translations': [{
+                'language': 'spanish',
+                'hello': 'hola',
+            }]
+        }
+        headers = {
+            'HTTP_Token': 'c84234c3-b507-4ed0-a6eb-8b10116cdef1'
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['error'], 'Token not found.')
+
+    def test_no_translations_data(self):
+        translations_data = {}
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Translations data is required.')
+
+    def test_invalid_token(self):
+        translations_data = {
+            'translations': []
+        }
+        headers = {
+            'HTTP_Token': 'invalid-token'
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Invalid token.')
+
+    def test_missing_translations_key(self):
+        translations_data = {
+            'language': 'spanish',
+            'hello': 'hola',
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Translations are improperly formatted.')
+
+    def test_non_string_keys(self):
+        translations_data = {
+            'translations': [{
+                1: 'spanish',
+                'hello': 'hola',
+            }]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Translations are improperly formatted.')
+
+    def test_non_string_values(self):
+        translations_data = {
+            'translations': [{
+                'language': 1,
+                'hello': 'hola',
+            }]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Translations are improperly formatted.')
+
+    def test_missing_language_key(self):
+        translations_data = {
+            'translations': [{
+                'hello': 'hola',
+                'what': 'que',
+            }]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Translations are improperly formatted.')
+
+    def test_updating_translation(self):
+        translations_data = {
+            'translations': [{
+                'language': 'spanish',
+                'hello': 'hola'
+            }]
+        }
+        translations_data_updated = {
+            'translations': [{
+                'language': 'spanish',
+                'hello': 'hola2'
+            }]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        response = self.client.post(reverse('process-translations'), translations_data_updated, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Use a PATCH request to make updates to translations.')
+
+    def test_add_translations(self):
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola'
+                },
+                {
+                    'language': 'french',
+                    'hello': 'bonjour'
+                },
+                {
+                    'language': 'italian',
+                    'hello': 'bonjourno'
+                }
+            ]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['message'], 'All translations created successfully.')
+        self.assertEqual(response.data['added_count'], 3)
+
+    def test_no_new_additions(self):
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola'
+                }
+            ]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], 'All translations created successfully.')
+        self.assertEqual(response.data['added_count'], 0)
+
+    def test_duplicate_additions(self):
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola'
+                },
+                {
+                    'language': 'spanish',
+                    'hello': 'hola',
+                    'hello': 'hola'
+                },
+            ]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['message'], 'All translations created successfully.')
+        self.assertEqual(response.data['added_count'], 1)
+
+    def test_create_bulk_translations_rollback(self):
+        """
+        Tests atomic transaction in post to rollback changes.
+        """
+        invalid_translations = [
+            ("hello", "hola", "spanish"),
+            ("bye", "chau", "spanish"),
+            ("another_word", None, "spanish")
+        ]
+        token = Token.objects.get(value=self.TEST_TOKEN)
+        success, added_count = bulk_create_translations(token, invalid_translations)
+        self.assertEqual(success, False)
+        self.assertEqual(added_count, 0)
+        translations = Translation.objects.all()
+        self.assertEqual(len(translations), 0)
+
+    def test_patch_translation_valid(self):
+        """
+        Test patch endpoint with one updated translation.
+        """
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola',
+                },
+                {
+                    'language': 'french',
+                    'hello': 'bonjour',
+                    'goodbye': 'adieu',
+                }
+            ]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        modified_translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola2',
+                },
+                {
+                    'language': 'french',
+                    'hello': 'pizza',
+                }
+            ]
+        }
+        response = self.client.patch(reverse('process-translations'), modified_translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['message'], 'All translations updated successfully.')
+        self.assertEqual(response.data['updated_count'], 2)
+
+    def test_patch_extra_translation(self):
+        """
+        Tests when user attempts to add a new translation using patch endpoint.
+        """
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola',
+                },
+            ]
+        }
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+        response = self.client.patch(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.data['error'], 'Use a POST request to make new translations.')
+
+    def test_update_translations_rollback(self):
+        """
+        Tests atomic transaction in patch to rollback changes.
+        """
+        invalid_translations = [
+            ("hello", "hola", "spanish"),
+            ("bye", "chau", "spanish"),
+            ("another_word", None, "spanish")
+        ]
+        token = Token.objects.get(value=self.TEST_TOKEN)
+        success, added_count = bulk_update_translations(token, invalid_translations)
+        self.assertEqual(success, False)
+        self.assertEqual(added_count, 0)
+        translations = Translation.objects.all()
+        self.assertEqual(len(translations), 0)
