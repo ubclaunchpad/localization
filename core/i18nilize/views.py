@@ -165,23 +165,31 @@ class TranslationView(APIView):
 
         # get token if it exists
         token_value = request.headers.get('Token')
+        if not token_value:
+            return Response({'error': 'Token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not is_valid_uuid(token_value):
+            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             token = Token.objects.get(value=token_value)
         except Token.DoesNotExist:
-            return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Missing valid token.'}, status=status.HTTP_404_NOT_FOUND)
 
         # get translation from api body
         if len(request.query_params) > 2:
-                return Response({"error": "query params should only include language and one translation pair"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "query params should only include language and one translation pair!"}, status=status.HTTP_400_BAD_REQUEST)
         language = request.query_params.get('language')
         translation_pair = {key: value for key, value in request.query_params.items() if key != "language"}        
 
-        # Check for missing parameters
-        if not language or len(translation_pair.items()) != 1:
-            return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+        # validate query parameters
+        if not language or len(translation_pair.items()) < 1:
+            return Response({"error": "Missing required fields in query params."}, status=status.HTTP_400_BAD_REQUEST)
         
         original_word, translated_word = list(translation_pair.items())[0]
-
+        if original_word.isdigit() or translated_word.isdigit():
+            return Response({"error": "Translation pair must be in string format!"}, status=status.HTTP_400_BAD_REQUEST)
+        
         # Check if translation already exists
         try:
             # Try to retrieve an existing translation
@@ -189,7 +197,7 @@ class TranslationView(APIView):
 
             # Check if the existing translated word matches with the new one
             if existing_translation.translated_word != translated_word:
-                return Response({"error": "Existing translation doesn't match new translation!"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Use a PATCH request to make updates to translations."}, status=status.HTTP_400_BAD_REQUEST)
 
             return Response({"message": "Existing translation already exists!"}, status=status.HTTP_200_OK)
 
@@ -197,7 +205,7 @@ class TranslationView(APIView):
         except Translation.DoesNotExist:
             translation = Translation.objects.create(token=token, original_word=original_word, translated_word=translated_word, language=language)
             data = {
-                "message": "translation successfuly created!",
+                "message": "Translation created successfuly!",
                 "language": translation.language,
                 "original_word": translation.original_word,
                 "translated_word": translation.translated_word
@@ -208,12 +216,18 @@ class TranslationView(APIView):
         """
         Retrieve a translation by its original word and token
         """
-       # get token if it exists
+        # get token if it exists
         token_value = request.headers.get('Token')
+        if not token_value:
+            return Response({'error': 'Token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not is_valid_uuid(token_value):
+            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             token = Token.objects.get(value=token_value)
         except Token.DoesNotExist:
-            return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Missing valid token.'}, status=status.HTTP_404_NOT_FOUND)
         
         # get word and language to translate to from api body
         original_word = request.query_params.get('original_word')
@@ -221,7 +235,7 @@ class TranslationView(APIView):
 
         # Check for missing parameters
         if not original_word or not language:
-            return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Missing required fields in query params."}, status=status.HTTP_400_BAD_REQUEST)
 
         # return translation if it exists
         try:
@@ -234,31 +248,38 @@ class TranslationView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         
         except Translation.DoesNotExist:
-            return Response({"error": "Translation not found for given language and word!"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Translation not found for given language and word!"}, status=status.HTTP_404_NOT_FOUND)
         
     def patch(self, request):
         """
         Update a new single translation.
         """
-
         # get token if it exists
         token_value = request.headers.get('Token')
+        if not token_value:
+            return Response({'error': 'Token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not is_valid_uuid(token_value):
+            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             token = Token.objects.get(value=token_value)
         except Token.DoesNotExist:
-            return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Missing valid token.'}, status=status.HTTP_404_NOT_FOUND)
 
         # get translation from api body
         if len(request.query_params) > 2:
-                return Response({"error": "query params should only include language and one translation pair"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "query params should only include language and one translation pair!"}, status=status.HTTP_400_BAD_REQUEST)
         language = request.query_params.get('language')
         translation_pair = {key: value for key, value in request.query_params.items() if key != "language"}        
 
-        # Check for missing parameters
-        if not language or len(translation_pair.items()) != 1:
-            return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+        # validate query parameters
+        if not language or len(translation_pair.items()) < 1:
+            return Response({"error": "Missing required fields in query params."}, status=status.HTTP_400_BAD_REQUEST)
         
         original_word, translated_word = list(translation_pair.items())[0]
+        if original_word.isdigit() or translated_word.isdigit():
+            return Response({"error": "Translation pair must be in string format!"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if translation already exists
         try:
@@ -277,45 +298,45 @@ class TranslationView(APIView):
                     "original_translated_word": old_translated_word,
                     "updated_translated_word": existing_translation.translated_word
                 }
-                return Response(data, status=status.HTTP_200_OK)
+                return Response(data, status=status.HTTP_201_CREATED)
 
             # otherwise, existing translation is the same as the new translation
             return Response({"message": "Existing translation already exists!"}, status=status.HTTP_200_OK)
 
         # Create the translation if it doesn't already exist
         except Translation.DoesNotExist:
-            translation = Translation.objects.create(token=token, original_word=original_word, translated_word=translated_word, language=language)
-            data = {
-                "message": "Translation created successfuly!",
-                "language": translation.language,
-                "original_word": translation.original_word,
-                "translated_word": translation.translated_word
-            }
-            return Response(data, status=status.HTTP_201_CREATED)
+            return Response({'error': 'Use a POST request to make new translations.'}, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request):
         """
         Delete a new single translation.
         """
-
         # get token if it exists
         token_value = request.headers.get('Token')
+        if not token_value:
+            return Response({'error': 'Token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not is_valid_uuid(token_value):
+            return Response({'error': 'Invalid token.'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
             token = Token.objects.get(value=token_value)
         except Token.DoesNotExist:
-            return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Missing valid token.'}, status=status.HTTP_404_NOT_FOUND)
 
         # get translation from api body
         if len(request.query_params) > 2:
-                return Response({"error": "query params should only include language and one translation pair"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "query params should only include language and one translation pair!"}, status=status.HTTP_400_BAD_REQUEST)
         language = request.query_params.get('language')
         translation_pair = {key: value for key, value in request.query_params.items() if key != "language"}        
 
-        # Check for missing parameters
-        if not language or len(translation_pair.items()) != 1:
-            return Response({"error": "Missing required fields."}, status=status.HTTP_400_BAD_REQUEST)
+        # validate query parameters
+        if not language or len(translation_pair.items()) < 1:
+            return Response({"error": "Missing required fields in query params."}, status=status.HTTP_400_BAD_REQUEST)
         
         original_word, translated_word = list(translation_pair.items())[0]
+        if original_word.isdigit() or translated_word.isdigit():
+            return Response({"error": "Translation pair must be in string format!"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Check if translation exists
         try:
@@ -331,4 +352,4 @@ class TranslationView(APIView):
 
         # Throw a bad request if the translation doesn't exist
         except Translation.DoesNotExist:
-            return Response({"error": "translation doesn't exist!"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "translation doesn't exist!"}, status=status.HTTP_404_NOT_FOUND)
