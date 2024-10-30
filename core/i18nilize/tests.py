@@ -74,7 +74,7 @@ class ProcessTranslationsViewTests(APITestCase):
         }
         response = self.client.post(reverse('process-translations'), translations_data, **headers)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.data['error'], 'Token not found.')
+        self.assertEqual(response.data['error'], 'Missing valid token.')
 
     def test_no_translations_data(self):
         translations_data = {}
