@@ -42,7 +42,7 @@ def add_language(language):
 
 # Adds/updates a translated word under the given language in the default JSON file
 def add_update_translated_word(language, original_word, translated_word):
-    data = get_json(DEFAULT_PATH)  
+    data = get_json(DEFAULT_PATH)
     translations = data.get('translations', [])
 
     language_exists = False
@@ -58,7 +58,28 @@ def add_update_translated_word(language, original_word, translated_word):
 
     if not language_exists:
         print(f"Error: Language '{language}' does not exist. Add the language before adding a translation.")
-        sys.exit(1)  
+        sys.exit(1)
+
+# Deletes a translated word
+def delete_translation(language, original_word, translated_word):
+    data = get_json(DEFAULT_PATH)
+    translations = data.get('translations', [])
+
+    language_exists = False
+    for translation in translations:
+        if translation.get('language') == language:
+            language_exists = True
+            if original_word in translation and translation[original_word] == translated_word:
+                del translation[original_word]
+    
+            with open(DEFAULT_PATH, 'w') as file:
+                json.dump(data, file, indent=4)
+                
+            break
+    
+    if not language_exists:
+        print(f"Error: Language '{language}' does not exist.")
+        sys.exit(1)
 
 # Input: 
 #   - file_path: path of json file
@@ -109,4 +130,3 @@ def make_translation_map(data):
 # get translations from hashmap given the language
 def get_translation(translations_map, language):
     return translations_map.get(language, "Translation not found")
-
