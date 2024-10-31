@@ -2,7 +2,7 @@ import json
 import sys
 
 # Should this be removed?
-DEFAULT_PATH = 'i18nilize/src/internationalize/resources/languages.json'
+DEFAULT_PATH = 'src/internationalize/resources/languages.json'
 
 # Function to parse json file, given its path
 def get_json(file_path):
