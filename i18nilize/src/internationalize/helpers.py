@@ -1,4 +1,4 @@
-import json
+import json, requests
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -32,23 +32,17 @@ def create_json(json_object):
     with open("src/internationalize/jsonFile/translations.json", "w") as outfile:
         outfile.write(json_object)
 
-# Input: None (for now)
+# Input: language
 # Output: None, but creates a local JSON file containing translations
-def generate_file():
-    file_content = {
-        "Token": "85124f79-0829-4b80-8b5c-d52700d86e46",
-        "translations" : [{
-				"language": "French",
-				"hello": "bonjour",
-				"No": "Non",
-				"Why": "pourquoi",
-			},
-			{
-				"language": "Spanish",
-				"hello": "Hola",
-			},
-		]
-    }
+def generate_file(language):
+    url = f'http://localhost:8000/api/translations/{language}/'  
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        file_content = response.json() 
+    else:
+        print(f'Error: {response.status_code}, {response.data['error']}')
+        file_content = None
 
     # transforms the dictionary object above into a JSON object
     json_object = json.dumps(file_content, indent=4)
