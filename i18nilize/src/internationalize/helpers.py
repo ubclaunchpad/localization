@@ -1,4 +1,6 @@
 import json, requests
+import os
+
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -29,7 +31,7 @@ def get_token(file_path):
 # Input: a JSON object
 # Output: None, but creates a local JSON file containing the object
 def create_json(json_object, language):
-    file_path = "src/internationalize/languages/" + language + ".json"
+    file_path = f"src/internationalize/languages/{language}.json"
     with open(file_path, "w") as outfile:
         outfile.write(json_object)
 
@@ -39,13 +41,11 @@ def generate_file(language):
     url = f'http://localhost:8000/api/translations/{language}/'  
     response = requests.get(url)
 
-    file_content = None
-
-    if response.status_code == 200:
-        file_content = response.json() 
-    else:
-        print(f'Error: {response.status_code}, {response.data['error']}')
-
+    if response.status_code != 200:
+        print(f'Error: {response.status_code}')
+        return
+    
+    file_content = response.json() 
     # transforms the dictionary object above into a JSON object
     json_object = json.dumps(file_content, indent=4)
     create_json(json_object, language)
