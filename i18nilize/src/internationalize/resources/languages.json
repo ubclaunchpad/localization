@@ -10,6 +10,9 @@
         {
             "language": "Spanish",
             "hello": "Hola"
+        },
+        {
+            "language": "Mandarin"
         }
     ]
 }
