@@ -141,6 +141,9 @@ class ProcessTranslationsView(APIView):
         """
         token = request.token
 
+        if not language:
+            return Response({'error': 'Language is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
         translations = tp.get_translations_by_language(language, token)
         if not translations:
             return Response(
