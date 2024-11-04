@@ -97,6 +97,23 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(len(french_translation), 5)
         self.assertEqual(french_translation['good'], "bien")
 
+    def test_update_word_language_exists(self):
+        data = get_json(self.TEST_JSON_PATH)
+        french_translation = data['translations'][0]
+        self.assertEqual(len(french_translation), 4)
+
+        add_update_translated_word("French", "good", "bie")
+        data = get_json(self.TEST_JSON_PATH)
+        french_translation = data['translations'][0]
+        self.assertEqual(len(french_translation), 5)
+        self.assertEqual(french_translation['good'], "bie")
+
+        add_update_translated_word("French", "good", "bien")
+        data = get_json(self.TEST_JSON_PATH)
+        french_translation = data['translations'][0]
+        self.assertEqual(len(french_translation), 5)
+        self.assertEqual(french_translation['good'], "bien")
+
     @patch('sys.exit')
     @patch('builtins.print')
     def test_add_word_language_does_not_exist(self, mock_print, mock_exit):
