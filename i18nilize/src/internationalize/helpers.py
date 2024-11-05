@@ -38,7 +38,7 @@ def create_json(json_object, language):
 # Input: language
 # Output: None, but creates a local JSON file containing translations
 def generate_file(language):
-    # url = f'http://localhost:8000/api/translations/{language}/'  
+    # url = f'http://localhost:8000/api/translations/'  
     # response = requests.get(url)
 
     # if response.status_code != 200:
