@@ -162,8 +162,9 @@ def get_translations_by_language(language, token):
     Return all translations for the given language as a dictionary.
     """
     translations = Translation.objects.filter(language=language, token=token)
-    if not translations:
-        translations = create_default_translations_for_language(language, token)
+    
+    # if not translations:
+    #     translations = create_default_translations_for_language(language, token)
 
     translations_dict = {
         translation.original_word: translation.translated_word 
@@ -171,5 +172,5 @@ def get_translations_by_language(language, token):
     }
     return translations_dict
 
-def create_default_translations_for_language(language, token):
+# def create_default_translations_for_language(language, token):
     # to be implemented by Brian & Angela's ticket?

@@ -327,14 +327,6 @@ class ProcessTranslationsViewTests(APITestCase):
         translations = Translation.objects.all()
         self.assertEqual(len(translations), 0)
 
-    def test_get_translations_no_language_provided(self): 
-        headers = {
-            'HTTP_Token': self.TEST_TOKEN
-        }
-        response = self.client.get(reverse('get-translations', args=['']), **headers)
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.data['error'], 'Language is required.')
-
     def test_get_translations_no_translations_found(self):
         translations_data = {
             'translations': [
@@ -344,16 +336,20 @@ class ProcessTranslationsViewTests(APITestCase):
                 }
             ]
         }
+        query_params = {
+            'language': 'french'
+        }
 
         headers = {
             'HTTP_Token': self.TEST_TOKEN
         }
 
-        # create translations
+        # create spanish translations
         response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        response = self.client.get(reverse('get-translations', args=['french']), **headers)
+      
+        # fetch french translations
+        response = self.client.get(reverse('process-translations'), **headers, query_params=query_params)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.data['error'], 'No translations found for french.')
 
@@ -366,6 +362,9 @@ class ProcessTranslationsViewTests(APITestCase):
                 }
             ]
         }
+        query_params = {
+            'language': 'spanish'
+        }
         
         expected_response_data = {
             'hello': 'hola'
@@ -375,11 +374,12 @@ class ProcessTranslationsViewTests(APITestCase):
             'HTTP_Token': self.TEST_TOKEN
         }
 
-        # create translations
+        # create spanish translations
         response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-        response = self.client.get(reverse('get-translations', args=['spanish']), **headers)
+        # fetch spanish translations
+        response = self.client.get(reverse('process-translations'), **headers, query_params=query_params)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, expected_response_data)
 

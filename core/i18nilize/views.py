@@ -135,14 +135,12 @@ class ProcessTranslationsView(APIView):
             )
 
     @require_valid_token
-    def get(self, request, language):
+    def get(self, request):
         """
         Fetch translations for a given language.
         """
         token = request.token
-
-        if not language:
-            return Response({'error': 'Language is required.'}, status=status.HTTP_400_BAD_REQUEST)
+        language = request.query_params.get('language')
 
         translations = tp.get_translations_by_language(language, token)
         if not translations:
