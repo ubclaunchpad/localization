@@ -14,14 +14,15 @@ On package setup, generates old state of translation files.
 def setup():
     try:
         os.mkdir(OLD_TRANSLATIONS_ROOT_DIR)
-        os.mkdir(OLD_TRANSLATIONS_ROOT_DIR + "/translations")
+        os.mkdir(OLD_TRANSLATIONS_FILES_DIR)
         with open(METADATA_FILE_DIR, "w") as outfile:
             json.dump({}, outfile)
-        sync(NEW_TRANSLATIONS_FILES_DIR, OLD_TRANSLATIONS_FILES_DIR, "sync", purge=True)
+        sync_translations()
 
         # Compute all file hashes and store hashes in metadata
-        files = os.listdir(OLD_TRANSLATIONS_FILES_DIR)
-        update_hashes(files)
+        all_files = os.listdir(OLD_TRANSLATIONS_FILES_DIR)
+        all_file_hashes = compute_hashes(OLD_TRANSLATIONS_FILES_DIR)
+        update_hashes(all_files, all_file_hashes)
     except FileExistsError:
         print(f"Old translations directory has already been created.")
     except PermissionError:
@@ -29,59 +30,50 @@ def setup():
     except Exception as e:
         print(f"An exception occured: {e}")
 
+def compute_hashes(directory):
+    hash_dict = {}
+    files = os.listdir(directory)
+    for file_name in files:
+        path = directory + "/" + file_name
+        
+        # Read file as byte buffer for hashing
+        with open(path, "rb") as file:
+            file_name_no_ext = file_name.split(".")[0]
+            file_content = file.read()
+            file_hash = compute_hash(file_content)
+            hash_dict[file_name_no_ext] = file_hash
+
+    return hash_dict
+
 def compute_hash(file_content):
     hash = hashlib.sha256()
     hash.update(file_content)
     return hash.hexdigest()
 
-def update_hashes(changed_files_list):
-    hash_dict = {}
-
+def update_hashes(changed_files_list, hash_dict):
+    metadata = {}
     with open(METADATA_FILE_DIR) as file:
-        hash_dict = json.load(file)
-
+        metadata = json.load(file)
+    
     for file_name in changed_files_list:
-        path = OLD_TRANSLATIONS_FILES_DIR + "/" + file_name
-        
-        # Read file as byte buffer
-        with open(path, "rb") as file:
-            file_name_no_ext = file_name.split(".")
-            file_content = file.read()
-            file_hash = compute_hash(file_content)
-            hash_dict[file_name_no_ext[0]] = file_hash
+        file_name_no_ext = file_name.split(".")[0]
+        metadata[file_name_no_ext] = hash_dict[file_name_no_ext]
 
     with open(METADATA_FILE_DIR, "w") as outfile:
         json.dump(hash_dict, outfile)
+
+def sync_translations():
+    sync(NEW_TRANSLATIONS_FILES_DIR, OLD_TRANSLATIONS_FILES_DIR, "sync", purge=True)
+
+"""
+Updates old file hashes and updates old state of changed files.
+"""
+def update_metadata(changed_files_list, hash_dict):
+    pass
 
 """
 Initializes new old state files and metadata if a new translation
 file is added.
 """
 def update_old_state():
-    pass
-
-"""
-Gets differences between old and new states of changed translation
-files.
-"""
-def get_diff():
-    pass
-
-"""
-Updates old file hashes and updates old state of changed files.
-"""
-def update_metadata():
-    pass
-
-"""
-Returns an array of added, modified, and deleted translations
-between two sets of translations.
-"""
-def compare_files(oldTranslations, newTranslations):
-    pass
-
-"""
-Compares hashes of old and new translation files.
-"""
-def get_changed_files():
     pass
