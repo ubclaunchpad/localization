@@ -9,7 +9,7 @@ METADATA_FILE_DIR = OLD_TRANSLATIONS_ROOT_DIR + "/metadata.json"
 NEW_TRANSLATIONS_FILES_DIR = "delete_after"
 
 """
-On package setup, generates old state of translation files.
+Initializes the old state of translations when package is first installed.
 """
 def setup():
     try:
@@ -22,7 +22,7 @@ def setup():
         # Compute all file hashes and store hashes in metadata
         all_files = os.listdir(OLD_TRANSLATIONS_FILES_DIR)
         all_file_hashes = compute_hashes(OLD_TRANSLATIONS_FILES_DIR)
-        update_hashes(all_files, all_file_hashes)
+        update_metadata(all_files, all_file_hashes)
     except FileExistsError:
         print(f"Old translations directory has already been created.")
     except PermissionError:
@@ -66,14 +66,8 @@ def sync_translations():
     sync(NEW_TRANSLATIONS_FILES_DIR, OLD_TRANSLATIONS_FILES_DIR, "sync", purge=True)
 
 """
-Updates old file hashes and updates old state of changed files.
+Updates translation files with new changes and updates hashes in metadata.
 """
 def update_metadata(changed_files_list, hash_dict):
-    pass
-
-"""
-Initializes new old state files and metadata if a new translation
-file is added.
-"""
-def update_old_state():
-    pass
+    update_hashes(changed_files_list, hash_dict)
+    sync_translations()
