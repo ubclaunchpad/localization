@@ -30,41 +30,6 @@ def setup():
     except Exception as e:
         print(f"An exception occured: {e}")
 
-def compute_hashes(directory):
-    hash_dict = {}
-    files = os.listdir(directory)
-    for file_name in files:
-        path = directory + "/" + file_name
-        
-        # Read file as byte buffer for hashing
-        with open(path, "rb") as file:
-            file_name_no_ext = file_name.split(".")[0]
-            file_content = file.read()
-            file_hash = compute_hash(file_content)
-            hash_dict[file_name_no_ext] = file_hash
-
-    return hash_dict
-
-def compute_hash(file_content):
-    hash = hashlib.sha256()
-    hash.update(file_content)
-    return hash.hexdigest()
-
-def update_metadata(changed_files_list, hash_dict):
-    metadata = {}
-    with open(METADATA_FILE_DIR) as file:
-        metadata = json.load(file)
-    
-    for file_name in changed_files_list:
-        file_name_no_ext = file_name.split(".")[0]
-        metadata[file_name_no_ext] = hash_dict[file_name_no_ext]
-
-    with open(METADATA_FILE_DIR, "w") as outfile:
-        json.dump(hash_dict, outfile)
-
-def sync_translations():
-    sync(CURR_TRANSLATION_FILES_DIR, OLD_TRANSLATION_FILES_DIR, "sync", purge=True)
-
 """
 Updates translation files with new changes and updates hashes in metadata.
 """
@@ -90,3 +55,43 @@ def diff():
 
     # return added, modified, deleted   
     pass
+
+
+"""
+Helper functions    
+"""
+
+def compute_hash(file_content):
+    hash = hashlib.sha256()
+    hash.update(file_content)
+    return hash.hexdigest()
+
+def compute_hashes(directory):
+    hash_dict = {}
+    files = os.listdir(directory)
+    for file_name in files:
+        path = directory + "/" + file_name
+        
+        # Read file as byte buffer for hashing
+        with open(path, "rb") as file:
+            file_name_no_ext = file_name.split(".")[0]
+            file_content = file.read()
+            file_hash = compute_hash(file_content)
+            hash_dict[file_name_no_ext] = file_hash
+
+    return hash_dict
+
+def update_metadata(changed_files_list, hash_dict):
+    metadata = {}
+    with open(METADATA_FILE_DIR) as file:
+        metadata = json.load(file)
+    
+    for file_name in changed_files_list:
+        file_name_no_ext = file_name.split(".")[0]
+        metadata[file_name_no_ext] = hash_dict[file_name_no_ext]
+
+    with open(METADATA_FILE_DIR, "w") as outfile:
+        json.dump(hash_dict, outfile)
+
+def sync_translations():
+    sync(CURR_TRANSLATION_FILES_DIR, OLD_TRANSLATION_FILES_DIR, "sync", purge=True)
