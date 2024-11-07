@@ -4,9 +4,9 @@ import json
 from dirsync import sync
 
 OLD_TRANSLATIONS_ROOT_DIR = "old_translations"
-OLD_TRANSLATIONS_FILES_DIR = OLD_TRANSLATIONS_ROOT_DIR + "/translations"
+OLD_TRANSLATION_FILES_DIR = OLD_TRANSLATIONS_ROOT_DIR + "/translations"
 METADATA_FILE_DIR = OLD_TRANSLATIONS_ROOT_DIR + "/metadata.json"
-NEW_TRANSLATIONS_FILES_DIR = "delete_after"
+CURR_TRANSLATION_FILES_DIR = "delete_after"
 
 """
 Initializes the old state of translations when package is first installed.
@@ -14,14 +14,14 @@ Initializes the old state of translations when package is first installed.
 def setup():
     try:
         os.mkdir(OLD_TRANSLATIONS_ROOT_DIR)
-        os.mkdir(OLD_TRANSLATIONS_FILES_DIR)
+        os.mkdir(OLD_TRANSLATION_FILES_DIR)
         with open(METADATA_FILE_DIR, "w") as outfile:
             json.dump({}, outfile)
         sync_translations()
 
         # Compute all file hashes and store hashes in metadata
-        all_files = os.listdir(OLD_TRANSLATIONS_FILES_DIR)
-        all_file_hashes = compute_hashes(OLD_TRANSLATIONS_FILES_DIR)
+        all_files = os.listdir(OLD_TRANSLATION_FILES_DIR)
+        all_file_hashes = compute_hashes(OLD_TRANSLATION_FILES_DIR)
         update_metadata(all_files, all_file_hashes)
     except FileExistsError:
         print(f"Old translations directory has already been created.")
@@ -50,7 +50,7 @@ def compute_hash(file_content):
     hash.update(file_content)
     return hash.hexdigest()
 
-def update_hashes(changed_files_list, hash_dict):
+def update_metadata(changed_files_list, hash_dict):
     metadata = {}
     with open(METADATA_FILE_DIR) as file:
         metadata = json.load(file)
@@ -63,11 +63,30 @@ def update_hashes(changed_files_list, hash_dict):
         json.dump(hash_dict, outfile)
 
 def sync_translations():
-    sync(NEW_TRANSLATIONS_FILES_DIR, OLD_TRANSLATIONS_FILES_DIR, "sync", purge=True)
+    sync(CURR_TRANSLATION_FILES_DIR, OLD_TRANSLATION_FILES_DIR, "sync", purge=True)
 
 """
 Updates translation files with new changes and updates hashes in metadata.
 """
-def update_metadata(changed_files_list, hash_dict):
-    update_hashes(changed_files_list, hash_dict)
+def update_old_state(changed_files_list, hash_dict):
+    update_metadata(changed_files_list, hash_dict)
     sync_translations()
+
+"""
+Gets differences between old and new translations and sets new state
+of translations.
+"""
+def diff():
+    # Get hashes of current translation files (current state)
+    new_hashes_dict = compute_hashes(CURR_TRANSLATION_FILES_DIR)
+
+    # Get files that changed by comparing hashes
+    changed_files_list = []
+
+    # Perform diffing on files that changed and get added, modified, deleted
+
+    # Update metadata and old state
+    update_old_state(changed_files_list, new_hashes_dict)
+
+    # return added, modified, deleted   
+    pass
