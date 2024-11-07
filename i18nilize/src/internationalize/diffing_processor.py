@@ -68,7 +68,7 @@ def sync_translations():
 """
 Updates translation files with new changes and updates hashes in metadata.
 """
-def update_old_state(changed_files_list, hash_dict):
+def update_to_current_state(changed_files_list, hash_dict):
     update_metadata(changed_files_list, hash_dict)
     sync_translations()
 
@@ -86,7 +86,7 @@ def diff():
     # Perform diffing on files that changed and get added, modified, deleted
 
     # Update metadata and old state
-    update_old_state(changed_files_list, new_hashes_dict)
+    update_to_current_state(changed_files_list, new_hashes_dict)
 
     # return added, modified, deleted   
     pass
