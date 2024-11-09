@@ -1,7 +1,5 @@
 import unittest
-import json
-from src.internationalize.generate_file import generate_file
-from src.internationalize.helpers import get_json
+from src.internationalize.helpers import get_json, generate_file
 
 # run tests using python -m tests.test_generate_file at i18nilize directory level
 

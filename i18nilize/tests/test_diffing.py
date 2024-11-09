@@ -3,7 +3,7 @@ import os
 import filecmp
 import json
 import shutil
-import src.internationalize.diffing_processor as dp
+from src.internationalize.diffing_processor import compute_hashes, DiffingProcessor
 
 class TestDiffing(unittest.TestCase):
 
@@ -13,7 +13,10 @@ class TestDiffing(unittest.TestCase):
         self.OLD_TRANSLATION_FILES_DIR = self.OLD_TRANSLATIONS_ROOT_DIR + "/translations"
         self.METADATA_FILE_DIR = self.OLD_TRANSLATIONS_ROOT_DIR + "/metadata.json"
         self.MODIFIED_TRANSLATIONS_DIR = "tests/resources/modified_translations"
-        dp.setup()
+
+        # initialize diffing processor
+        self.dp = DiffingProcessor(self.CURR_TRANSLATION_FILES_DIR)
+        self.dp.setup()
 
     def tearDown(self):
         if os.path.exists(self.OLD_TRANSLATIONS_ROOT_DIR):
@@ -39,9 +42,9 @@ class TestDiffing(unittest.TestCase):
         self.assertTrue(len(errors) == 0)
 
     def test_updating_state(self):
-        hashes = dp.compute_hashes(self.MODIFIED_TRANSLATIONS_DIR)
+        hashes = compute_hashes(self.MODIFIED_TRANSLATIONS_DIR)
         changed_files = ["spanish.json"]
-        dp.update_to_current_state(changed_files, hashes)
+        self.dp.update_to_current_state(changed_files, hashes)
 
         updated_metadata = {}
         with open(self.METADATA_FILE_DIR) as file:
@@ -63,3 +66,5 @@ class TestDiffing(unittest.TestCase):
         # )
         # print(match)
         # self.assertTrue(len(match) == 2)
+
+unittest.main()
