@@ -1,6 +1,6 @@
 import json
 import os
-
+import requests
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -37,20 +37,16 @@ def create_json(json_object, language):
 
 # Input: language
 # Output: None, but creates a local JSON file containing translations
-def generate_file(language):
-    # url = f'http://localhost:8000/api/translations/'  
-    # response = requests.get(url)
+def generate_file(language, token):
+    url = 'http://localhost:8000/api/translations/'
+    params = {'language': language, 'token': token}
+    response = requests.get(url, params=params)
 
-    # if response.status_code != 200:
-    #     print(f'Error: {response.status_code}')
-    #     return
+    if response.status_code != 200:
+        print(f'Error: {response.status_code}')
+        return
     
-    # file_content = response.json() 
-    file_content = {
-        "language": "Spanish",
-        "hello": "hola",
-        "thanks": "gracias"
-    }
+    file_content = response.json() 
     
     # transforms the dictionary object above into a JSON object
     json_object = json.dumps(file_content, indent=4)
