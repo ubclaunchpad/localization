@@ -31,8 +31,9 @@ def get_token(file_path):
 # Input: a JSON object
 # Output: None, but creates a local JSON file containing the object
 def create_json(json_object, language):
-    file_path = f"./languages/{language}.json"
-    with open(file_path, "w") as outfile:
+    base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(base_dir, 'languages', f'{language}.json')
+    with open(file_path, 'w') as outfile:
         outfile.write(json_object)
 
 # Input: language
