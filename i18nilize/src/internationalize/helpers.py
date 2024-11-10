@@ -39,9 +39,10 @@ def create_json(json_object, language):
 # Input: language
 # Output: None, but creates a local JSON file containing translations
 def generate_file(language, token):
-    url = 'http://localhost:8000/api/process-translations/'
-    params = {'language': language, 'token': token}
-    response = requests.get(url, params=params)
+    url = 'http://localhost:8000/api/translations'
+    params = {'language': language}
+    headers = {'token': token}
+    response = requests.get(url, params=params, headers=headers)
 
     if response.status_code != 200:
         print(f'Error: {response.status_code}')
