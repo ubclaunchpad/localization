@@ -145,7 +145,7 @@ class ProcessTranslationsView(APIView):
         translations = tp.get_translations_by_language(language, token)
         if not translations:
             return Response(
-                {"error": f"No translations found for {language}."},
+                {'error': f'No translations found for {language}.'},
                 status=status.HTTP_404_NOT_FOUND
             )
         

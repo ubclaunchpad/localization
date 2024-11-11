@@ -45,7 +45,7 @@ def generate_file(language, token):
     response = requests.get(url, params=params, headers=headers)
 
     if response.status_code != 200:
-        print(f'Error: {response.status_code}')
+        print(f'Error: {response.status_code}.', response.json()['error'])
         return
     
     file_content = response.json() 
