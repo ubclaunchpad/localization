@@ -8,46 +8,43 @@ from src.internationalize.diffing_processor import compute_hashes, DiffingProces
 class TestDiffing(unittest.TestCase):
 
     def setUp(self):
-        self.CURR_TRANSLATION_FILES_DIR = "tests/resources/test_translations"
-        self.OLD_TRANSLATIONS_ROOT_DIR = "old_translations"
-        self.OLD_TRANSLATION_FILES_DIR = self.OLD_TRANSLATIONS_ROOT_DIR + "/translations"
-        self.METADATA_FILE_DIR = self.OLD_TRANSLATIONS_ROOT_DIR + "/metadata.json"
-        self.MODIFIED_TRANSLATIONS_DIR = "tests/resources/modified_translations"
+        self.test_translations_dir = "tests/resources/test_translations"
+        self.modified_translations_dir = "tests/resources/modified_translations"
 
         # initialize diffing processor
-        self.dp = DiffingProcessor(self.CURR_TRANSLATION_FILES_DIR)
+        self.dp = DiffingProcessor(self.test_translations_dir)
         self.dp.setup()
 
     def tearDown(self):
-        if os.path.exists(self.OLD_TRANSLATIONS_ROOT_DIR):
-            shutil.rmtree(self.OLD_TRANSLATIONS_ROOT_DIR)
+        if os.path.exists(self.dp.diff_state_root_dir):
+            shutil.rmtree(self.dp.diff_state_root_dir)
 
     def test_initialization(self):
-        self.assertTrue(os.path.exists(self.OLD_TRANSLATIONS_ROOT_DIR))
-        self.assertTrue(os.path.exists(self.OLD_TRANSLATION_FILES_DIR))
-        self.assertTrue(os.path.exists(self.METADATA_FILE_DIR))
+        self.assertTrue(os.path.exists(self.dp.diff_state_root_dir))
+        self.assertTrue(os.path.exists(self.dp.diff_state_files_dir))
+        self.assertTrue(os.path.exists(self.dp.metadata_file_dir))
 
-        must_exist_files = os.listdir(self.CURR_TRANSLATION_FILES_DIR)
+        must_exist_files = os.listdir(self.test_translations_dir)
         match, mismatch, errors = filecmp.cmpfiles(
-            self.CURR_TRANSLATION_FILES_DIR,
-            self.OLD_TRANSLATION_FILES_DIR,
+            self.test_translations_dir,
+            self.dp.diff_state_files_dir,
             must_exist_files,
             shallow=False
         )
 
-        curr_translations_len = len(os.listdir(self.OLD_TRANSLATION_FILES_DIR))
+        curr_translations_len = len(os.listdir(self.dp.diff_state_files_dir))
         self.assertEqual(curr_translations_len, len(must_exist_files))
         self.assertTrue(len(match) == len(must_exist_files))
         self.assertTrue(len(mismatch) == 0)
         self.assertTrue(len(errors) == 0)
 
     def test_updating_state(self):
-        hashes = compute_hashes(self.MODIFIED_TRANSLATIONS_DIR)
+        hashes = compute_hashes(self.modified_translations_dir)
         changed_files = ["spanish.json"]
         self.dp.update_to_current_state(changed_files, hashes)
 
         updated_metadata = {}
-        with open(self.METADATA_FILE_DIR) as file:
+        with open(self.dp.metadata_file_dir) as file:
             updated_metadata = json.load(file)
 
         self.assertIsNotNone(updated_metadata["spanish"])
@@ -56,11 +53,11 @@ class TestDiffing(unittest.TestCase):
         self.assertEqual(hashes["italian"], updated_metadata["italian"])
        
         ### Need to finish this part of test
-        # must_exist_files = os.listdir(self.MODIFIED_TRANSLATIONS_DIR)
+        # must_exist_files = os.listdir(self.modified_translations_dir)
         # print(must_exist_files)
         # match, mismatch, errors = filecmp.cmpfiles(
-        #     self.MODIFIED_TRANSLATIONS_DIR,
-        #    self.OLD_TRANSLATION_FILES_DIR,
+        #     self.modified_translations_dir,
+        #    self.dp.diff_state_files_dir,
         #    must_exist_files,
         #    shallow=False
         # )
