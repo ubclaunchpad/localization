@@ -6,9 +6,9 @@ from dirsync import sync
 # Diffing Processor Class
 class DiffingProcessor():
     def __init__(self, curr_translations_dir):
-        self.old_translations_root_dir = "old_translations"
-        self.old_translation_files_dir = os.path.join(self.old_translations_root_dir, "translations")
-        self.metadata_file_dir = os.path.join(self.old_translations_root_dir, "metadata.json")
+        self.diff_state_root_dir = "diff_state"
+        self.diff_state_files_dir = os.path.join(self.diff_state_root_dir, "translations")
+        self.metadata_file_dir = os.path.join(self.diff_state_root_dir, "metadata.json")
         self.curr_translation_files_dir = curr_translations_dir
 
     """
@@ -16,8 +16,8 @@ class DiffingProcessor():
     """
     def setup(self):
         try:
-            os.mkdir(self.old_translations_root_dir)
-            os.mkdir(self.old_translation_files_dir)
+            os.mkdir(self.diff_state_root_dir)
+            os.mkdir(self.diff_state_files_dir)
             with open(self.metadata_file_dir, "w") as outfile:
                 json.dump({}, outfile)
 
@@ -25,8 +25,8 @@ class DiffingProcessor():
             self.sync_translations()
 
             # Compute all file hashes and store hashes in metadata
-            all_files = os.listdir(self.old_translation_files_dir)
-            all_file_hashes = compute_hashes(self.old_translation_files_dir)
+            all_files = os.listdir(self.diff_state_files_dir)
+            all_file_hashes = compute_hashes(self.diff_state_files_dir)
             self.update_metadata(all_files, all_file_hashes)
         except FileExistsError:
             print(f"Old translations directory has already been created.")
@@ -74,7 +74,7 @@ class DiffingProcessor():
             json.dump(hash_dict, outfile)
 
     def sync_translations(self):
-        sync(self.curr_translation_files_dir, self.old_translation_files_dir, "sync", purge=True)
+        sync(self.curr_translation_files_dir, self.diff_state_files_dir, "sync", purge=True)
 
 
 """
