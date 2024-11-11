@@ -67,4 +67,5 @@ class TestDiffing(unittest.TestCase):
         # print(match)
         # self.assertTrue(len(match) == 2)
 
-unittest.main()
+    if __name__ == '__main__':
+        unittest.main()
