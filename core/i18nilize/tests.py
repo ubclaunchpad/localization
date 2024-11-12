@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from .models import Token, Translation
-from .services.translation_processor import bulk_create_translations, bulk_update_translations
+from .services.translation_processor import bulk_create_translations, bulk_update_translations, get_translations_by_language
 
 
 class TokenViewTests(APITestCase):
@@ -326,6 +326,62 @@ class ProcessTranslationsViewTests(APITestCase):
         self.assertEqual(added_count, 0)
         translations = Translation.objects.all()
         self.assertEqual(len(translations), 0)
+
+    def test_get_translations_no_translations_found(self):
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola'
+                }
+            ]
+        }
+        query_params = {
+            'language': 'french'
+        }
+
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+
+        # create spanish translations
+        response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+      
+        # fetch french translations
+        response = self.client.get(reverse('process-translations'), **headers, query_params=query_params)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(response.data['error'], 'No translations found for french.')
+
+    def test_get_translations_by_language(self):
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola'
+                }
+            ]
+        }
+        query_params = {
+            'language': 'spanish'
+        }
+        
+        expected_response_data = {
+            'hello': 'hola'
+        }
+
+        headers = {
+            'HTTP_Token': self.TEST_TOKEN
+        }
+
+        # create spanish translations
+        response = self.client.post(reverse('process-translations'), translations_data, **headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # fetch spanish translations
+        response = self.client.get(reverse('process-translations'), **headers, query_params=query_params)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, expected_response_data)
 
 class TranslationViewTests(APITestCase):
     
