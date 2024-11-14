@@ -3,18 +3,24 @@ import os
 import filecmp
 import json
 import shutil
+from tests.util.test_diffing_util import DiffingTestUtil
 from src.internationalize.diffing_processor import compute_hashes, DiffingProcessor
 
 class TestDiffing(unittest.TestCase):
-
     def setUp(self):
-        self.test_translations_dir = "tests/resources/test_translations"
-        self.modified_translations_dir = "tests/resources/modified_translations"
+        self.test_translations_dir = "tests/resources/diffing_algorithm/test_translations/"
+        self.basic_data_location = "tests/resources/diffing_algorithm/basic_initial_translations/"
+        self.basic_modified_data_location = "tests/resources/diffing_algorithm/basic_modified_translations/"
+
+        # initialize util class
+        self.util = DiffingTestUtil(self.test_translations_dir)
+        self.util.initialize_test_data(self.basic_data_location)
 
         # initialize diffing processor
         self.dp = DiffingProcessor(self.test_translations_dir)
         self.dp.setup()
 
+    # tear down diffing processor instance
     def tearDown(self):
         if os.path.exists(self.dp.diff_state_root_dir):
             shutil.rmtree(self.dp.diff_state_root_dir)
@@ -38,9 +44,45 @@ class TestDiffing(unittest.TestCase):
         self.assertTrue(len(mismatch) == 0)
         self.assertTrue(len(errors) == 0)
 
+
+    def test_find_changed_files_basic(self):
+        self.util.bulk_modify_test_data(self.basic_modified_data_location)
+        expected_changed_files = ["italian.json", "spanish.json"]
+        changed_files = self.dp.get_changed_files()
+        self.assertListEqual(changed_files, expected_changed_files)
+
+
+    def test_find_changed_translations_basic(self):
+        self.util.bulk_modify_test_data(self.basic_modified_data_location)
+        expected_changed_translations = {
+            "italian": {
+                "created": {},
+                "modified": {
+                    "thanks": "La ringrazio"
+                },
+                "deleted": {
+                    "welcome": "benvenuto"
+                }
+            },
+            "spanish": {
+                "created": {
+                    "welcome": "bienvenido"
+                },
+                "modified": {
+                    "hello": "holi"
+                },
+                "deleted": {}
+            }
+        }
+
+        changed_translations = self.dp.get_changed_translations()
+        self.assertEqual(changed_translations, expected_changed_translations)
+
+
+
     def test_updating_state(self):
-        hashes = compute_hashes(self.modified_translations_dir)
-        changed_files = ["spanish.json"]
+        hashes = compute_hashes(self.test_translations_dir)
+        changed_files = ["italian.json", "spanish.json"]
         self.dp.update_to_current_state(changed_files, hashes)
 
         updated_metadata = {}
@@ -64,5 +106,6 @@ class TestDiffing(unittest.TestCase):
         # print(match)
         # self.assertTrue(len(match) == 2)
 
-    if __name__ == '__main__':
-        unittest.main()
+
+if __name__ == '__main__':
+    unittest.main()

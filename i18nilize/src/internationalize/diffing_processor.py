@@ -3,7 +3,15 @@ import hashlib
 import json
 from dirsync import sync
 
-# Diffing Processor Class
+JSON_EXTENSION = ".json"
+
+CREATED = "created"
+MODIFIED = "modified"
+DELETED = "deleted"
+
+"""
+Diffing Processor Class
+"""
 class DiffingProcessor():
     def __init__(self, curr_translations_dir):
         self.diff_state_root_dir = "diff_state"
@@ -42,25 +50,6 @@ class DiffingProcessor():
         self.update_metadata(changed_files_list, hash_dict)
         self.sync_translations()
 
-    """
-    Gets differences between old and new translations and sets new state
-    of translations.
-    """
-    def diff(self):
-        # Get hashes of current translation files (current state)
-        new_hashes_dict = self.compute_hashes(self.curr_translation_files_dir)
-
-        # Get files that changed by comparing hashes
-        changed_files_list = []
-
-        # Perform diffing on files that changed and get added, modified, deleted
-
-        # Update metadata and old state
-        self.update_to_current_state(changed_files_list, new_hashes_dict)
-
-        # return added, modified, deleted   
-        pass
-
     def update_metadata(self, changed_files_list, hash_dict):
         metadata = {}
         with open(self.metadata_file_dir) as file:
@@ -76,11 +65,85 @@ class DiffingProcessor():
     def sync_translations(self):
         sync(self.curr_translation_files_dir, self.diff_state_files_dir, "sync", purge=True)
 
+    """
+    Returns a list of all the files that have been modified
+    """
+    def get_changed_files(self):
+        # Initialize hashes
+        current_hashes = compute_hashes(self.curr_translation_files_dir)
+
+        with open(self.metadata_file_dir, "r") as file:
+            original_hashes = json.load(file)
+
+        changed_files = []
+
+        # Find any languages that were either modified or added the current PIP package
+        for language, current_hash in current_hashes.items():
+            if language not in original_hashes or original_hashes[language] != current_hash:
+                changed_files.append(language + JSON_EXTENSION)
+
+        # Find files that were removed from PIP package
+        for language in original_hashes:
+            if language not in current_hashes:
+                changed_files.append(language + JSON_EXTENSION)
+
+        return changed_files
+
+    """
+    Gets differences between old and new translations
+    """
+    def get_changed_translations(self):
+        changed_files = self.get_changed_files()
+        changed_translations = {}
+
+        # Perform diffing on files that changed and got added, modified, deleted
+        for file_name in changed_files:
+            language = file_name.split(".")[0]
+            changed_translations[language] = self.compare_language(file_name)
+
+
+        """
+        commented out updating metadata in this section for now
+        """
+        # # Update metadata and old state
+        # self.update_to_current_state(changed_files_list, new_hashes_dict)
+
+        return changed_translations
+
+    """
+    Gets differences between old and new translations for one language
+    """
+    def compare_language(self, file_name):        
+        original_language_location = self.diff_state_files_dir + "\\" + file_name
+        current_language_location = self.curr_translation_files_dir + "\\" + file_name
+
+        original_language = read_language(original_language_location)
+        current_language = read_language(current_language_location)
+
+        changed_translations = {}
+        changed_translations[CREATED] = {}
+        changed_translations[MODIFIED] = {}
+        changed_translations[DELETED] = {}
+
+        # find modified and newly added translations
+        for word, translation in current_language.items():
+            if word not in original_language:
+                changed_translations[CREATED][word] = translation
+            elif translation != original_language[word]:
+                changed_translations[MODIFIED][word] = translation
+
+        # find removed translations
+        for word, translation in original_language.items():
+            if word not in current_language:
+                changed_translations[DELETED][word] = translation
+
+        return changed_translations
+
+
 
 """
 Helper functions    
 """
-
 def compute_hash(file_content):
     hash = hashlib.sha256()
     hash.update(file_content)
@@ -100,3 +163,18 @@ def compute_hashes(directory):
             hash_dict[file_name_no_ext] = file_hash
 
     return hash_dict
+
+"""
+Reads a language file given the directory and returns json object
+"""
+def read_language(directory):
+    try:
+        with open(directory, "r") as file:
+            language = json.load(file)
+            return language
+    except FileNotFoundError:
+        print(f"File not found: {directory}")
+        raise
+    except IOError:
+        print(f"An error occurred while trying to read the file: {directory}")
+        raise
