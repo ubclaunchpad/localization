@@ -156,3 +156,15 @@ def bulk_update_translations(token, updated_translations):
     except Exception as e:
         print(e)
         return False, 0
+
+def get_translations_by_language(language, token):
+    """
+    Return all translations for the given language as a dictionary.
+    """
+    translations = Translation.objects.filter(language=language, token=token)
+
+    translations_dict = {
+        translation.original_word: translation.translated_word 
+        for translation in translations
+    }
+    return translations_dict

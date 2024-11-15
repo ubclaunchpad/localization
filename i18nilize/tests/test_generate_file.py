@@ -1,29 +1,45 @@
 import unittest
+from unittest.mock import patch, Mock
 import json
-from src.internationalize.generate_file import generate_file
-from src.internationalize.helpers import get_json
+import os
+from src.internationalize.helpers import generate_file
 
 # run tests using python -m tests.test_generate_file at i18nilize directory level
 
-class TestGenerateFile(unittest.TestCase):
-    generate_file()
-    data = get_json("src/internationalize/jsonFile/translations.json")
+class TestGenerateFile(unittest.TestCase):                
+    def setUp(self):
+        self.TEST_TOKEN = '85124f79-0829-4b80-8b5c-d52700d86e46'
 
-    def test_token(self):
-        self.assertEqual(self.data['Token'], "85124f79-0829-4b80-8b5c-d52700d86e46")
+    @patch('src.internationalize.helpers.requests.get')
+    def test_generate_file_success(self, mock_get):
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = { 
+            'hello': 'hola',
+            'thanks': 'gracias'
+        }  
+        mock_get.return_value = mock_response
+
+        generate_file('spanish', self.TEST_TOKEN)
+        
+        expected_file_path = './src/internationalize/languages/spanish.json'
+        self.assertTrue(os.path.exists(expected_file_path))
+
+        with open (expected_file_path, 'r') as file:
+            content = file.read()
+            expected_content = json.dumps(mock_response.json.return_value, indent = 4)
+            self.assertEqual(content, expected_content)
     
-    def test_translations(self):
-        translations = self.data['translations']
-        self.assertEqual(len(translations), 2)
+    @patch('src.internationalize.helpers.requests.get')
+    def test_generate_file_error(self, mock_get):
+        mock_response = Mock()
+        mock_response.status_code = 404
+        mock_get.return_value = mock_response
 
-        # French
-        self.assertEqual(translations[0]['language'], "French")
-        self.assertEqual(translations[0]['hello'], "bonjour")
-        self.assertEqual(translations[0]['No'], "Non")
-        self.assertEqual(translations[0]['Why'], "pourquoi")
-    
-        # Spanish
-        self.assertEqual(translations[1]['language'], "Spanish")
-        self.assertEqual(translations[1]['hello'], "Hola")
+        generate_file('french', self.TEST_TOKEN)
+        
+        expected_file_path = './src/internationalize/languages/french.json'
+        self.assertFalse(os.path.exists(expected_file_path))
 
-unittest.main()
+if __name__ == '__main__':
+    unittest.main()
