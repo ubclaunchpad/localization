@@ -46,16 +46,23 @@ class TestDiffing(unittest.TestCase):
 
 
     def test_find_changed_files_basic(self):
-        self.util.bulk_modify_test_data(self.basic_modified_data_location)
-        expected_changed_files = ["italian.json", "spanish.json"]
+        self.util.initialize_test_data(self.basic_modified_data_location)
+        expected_changed_files = {
+            "modified": ["italian.json", "spanish.json"],
+            "created": ["mandarin.json"],
+            "deleted": ["french.json"]
+        }
         changed_files = self.dp.get_changed_files()
-        self.assertListEqual(changed_files, expected_changed_files)
+
+        for type, languages in changed_files.items():
+            self.assertListEqual(languages, expected_changed_files[type])
 
 
     def test_find_changed_translations_basic(self):
-        self.util.bulk_modify_test_data(self.basic_modified_data_location)
-        expected_changed_translations = {
+        self.util.initialize_test_data(self.basic_modified_data_location)
+        expected_changed_translations = expected_changed_translations = {
             "italian": {
+                "type": "modified",
                 "created": {},
                 "modified": {
                     "thanks": "La ringrazio"
@@ -65,12 +72,28 @@ class TestDiffing(unittest.TestCase):
                 }
             },
             "spanish": {
+                "type": "modified",
                 "created": {
                     "welcome": "bienvenido"
                 },
                 "modified": {
                     "hello": "holi"
                 },
+                "deleted": {}
+            },
+            "french": {
+                "type": "deleted",
+                "created": {},
+                "modified": {},
+                "deleted": {}
+            },
+            "mandarin": {
+                "type": "created",
+                "created": {
+                    "hello": "ni hao",
+                    "welcome": "huan yin"
+                },
+                "modified": {},
                 "deleted": {}
             }
         }

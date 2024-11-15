@@ -5,6 +5,7 @@ from dirsync import sync
 
 JSON_EXTENSION = ".json"
 
+TYPE = "type"
 CREATED = "created"
 MODIFIED = "modified"
 DELETED = "deleted"
@@ -75,17 +76,25 @@ class DiffingProcessor():
         with open(self.metadata_file_dir, "r") as file:
             original_hashes = json.load(file)
 
-        changed_files = []
+        changed_files = {
+            CREATED: [],
+            MODIFIED: [],
+            DELETED: []
+        }
 
         # Find any languages that were either modified or added the current PIP package
         for language, current_hash in current_hashes.items():
-            if language not in original_hashes or original_hashes[language] != current_hash:
-                changed_files.append(language + JSON_EXTENSION)
+            file_name = language + JSON_EXTENSION
+            if language not in original_hashes:
+                changed_files[CREATED].append(file_name)
+            elif original_hashes[language] != current_hash:
+                changed_files[MODIFIED].append(file_name)
 
         # Find files that were removed from PIP package
         for language in original_hashes:
+            file_name = language + JSON_EXTENSION
             if language not in current_hashes:
-                changed_files.append(language + JSON_EXTENSION)
+                changed_files[DELETED].append(file_name)
 
         return changed_files
 
@@ -96,11 +105,17 @@ class DiffingProcessor():
         changed_files = self.get_changed_files()
         changed_translations = {}
 
-        # Perform diffing on files that changed and got added, modified, deleted
-        for file_name in changed_files:
-            language = file_name.split(".")[0]
-            changed_translations[language] = self.compare_language(file_name)
+        for type, file_names in changed_files.items():
+            for file_name in file_names:
+                language = file_name.split(".")[0]
+                changed_translations[language] = self.__initialize_changed_template(type)
 
+                # fetch modified translations
+                if type == MODIFIED:
+                    changed_translations[language] = self.compare_language(file_name, changed_translations[language])
+
+                if type == CREATED:
+                    changed_translations[language] = self.add_language(file_name, changed_translations[language])
 
         """
         commented out updating metadata in this section for now
@@ -113,17 +128,12 @@ class DiffingProcessor():
     """
     Gets differences between old and new translations for one language
     """
-    def compare_language(self, file_name):        
+    def compare_language(self, file_name, changed_translations):        
         original_language_location = self.diff_state_files_dir + "\\" + file_name
         current_language_location = self.curr_translation_files_dir + "\\" + file_name
 
         original_language = read_language(original_language_location)
         current_language = read_language(current_language_location)
-
-        changed_translations = {}
-        changed_translations[CREATED] = {}
-        changed_translations[MODIFIED] = {}
-        changed_translations[DELETED] = {}
 
         # find modified and newly added translations
         for word, translation in current_language.items():
@@ -138,7 +148,26 @@ class DiffingProcessor():
                 changed_translations[DELETED][word] = translation
 
         return changed_translations
+    
+    def add_language(self, file_name, changed_translations):
+        current_language_location = self.curr_translation_files_dir + "\\" + file_name
+        current_language = read_language(current_language_location)
 
+        for word, translation in current_language.items():
+            changed_translations[CREATED][word] = translation
+
+        return changed_translations
+    
+    """
+    Create empty JSON template to show modifications from a language
+    """
+    def __initialize_changed_template(self, type):
+        changed_translations = {}
+        changed_translations[TYPE] = type
+        changed_translations[CREATED] = {}
+        changed_translations[MODIFIED] = {}
+        changed_translations[DELETED] = {}
+        return changed_translations
 
 
 """
@@ -178,3 +207,5 @@ def read_language(directory):
     except IOError:
         print(f"An error occurred while trying to read the file: {directory}")
         raise
+    except Exception as e:
+        print(f"An exception occured: {e}") 
