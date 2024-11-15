@@ -34,6 +34,7 @@ class TestDiffing(unittest.TestCase):
     def tearDown(self):
         if os.path.exists(self.dp.diff_state_root_dir):
             shutil.rmtree(self.dp.diff_state_root_dir)
+        self.util.clear_test_data()
 
     def test_initialization(self):
         self.assertTrue(os.path.exists(self.dp.diff_state_root_dir))
