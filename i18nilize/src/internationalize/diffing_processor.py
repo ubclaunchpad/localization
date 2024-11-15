@@ -52,14 +52,6 @@ class DiffingProcessor():
         self.sync_translations()
 
     def update_metadata(self, changed_files_list, hash_dict):
-        metadata = {}
-        with open(self.metadata_file_dir) as file:
-            metadata = json.load(file)
-        
-        for file_name in changed_files_list:
-            file_name_no_ext = file_name.split(".")[0]
-            metadata[file_name_no_ext] = hash_dict[file_name_no_ext]
-
         with open(self.metadata_file_dir, "w") as outfile:
             json.dump(hash_dict, outfile)
 
@@ -129,8 +121,8 @@ class DiffingProcessor():
     Gets differences between old and new translations for one language
     """
     def compare_language(self, file_name, changed_translations):        
-        original_language_location = self.diff_state_files_dir + "\\" + file_name
-        current_language_location = self.curr_translation_files_dir + "\\" + file_name
+        original_language_location = os.path.join(self.diff_state_files_dir, file_name)
+        current_language_location = os.path.join(self.curr_translation_files_dir, file_name)
 
         original_language = read_json_file(original_language_location)
         current_language = read_json_file(current_language_location)
@@ -150,7 +142,7 @@ class DiffingProcessor():
         return changed_translations
     
     def add_language(self, file_name, changed_translations):
-        current_language_location = self.curr_translation_files_dir + "\\" + file_name
+        current_language_location = os.path.join(self.curr_translation_files_dir, file_name)
         current_language = read_json_file(current_language_location)
 
         for word, translation in current_language.items():
