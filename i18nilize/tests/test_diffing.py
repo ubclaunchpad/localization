@@ -4,17 +4,27 @@ import filecmp
 import json
 import shutil
 from tests.util.test_diffing_util import DiffingTestUtil
-from src.internationalize.diffing_processor import compute_hashes, DiffingProcessor
+from src.internationalize.diffing_processor import compute_hashes, read_json_file, DiffingProcessor
 
 class TestDiffing(unittest.TestCase):
     def setUp(self):
-        self.test_translations_dir = "tests/resources/diffing_algorithm/test_translations/"
-        self.basic_data_location = "tests/resources/diffing_algorithm/basic_initial_translations/"
-        self.basic_modified_data_location = "tests/resources/diffing_algorithm/basic_modified_translations/"
+        # main directory for diffing tests
+        self.test_data_location = "tests/resources/diffing_algorithm/"
+
+        # 'mock' translations folder to mimic real user interaction
+        self.test_translations_dir = self.test_data_location + "test_translations/"
+
+        """
+        I'm not sure if we should set up the basic test for every test we run in this file
+        May need to refactor to allow more complex tests to be initialized too
+        """
+        self.basic_initial_data_location = self.test_data_location + "basic_test/initial_translations/"
+        self.basic_modified_data_location = self.test_data_location + "basic_test/modified_translations/"
+        self.basic_expected_output = self.test_data_location + "basic_test/expected_output.json"
 
         # initialize util class
         self.util = DiffingTestUtil(self.test_translations_dir)
-        self.util.initialize_test_data(self.basic_data_location)
+        self.util.initialize_test_data(self.basic_initial_data_location)
 
         # initialize diffing processor
         self.dp = DiffingProcessor(self.test_translations_dir)
@@ -60,43 +70,7 @@ class TestDiffing(unittest.TestCase):
 
     def test_find_changed_translations_basic(self):
         self.util.initialize_test_data(self.basic_modified_data_location)
-        expected_changed_translations = expected_changed_translations = {
-            "italian": {
-                "type": "modified",
-                "created": {},
-                "modified": {
-                    "thanks": "La ringrazio"
-                },
-                "deleted": {
-                    "welcome": "benvenuto"
-                }
-            },
-            "spanish": {
-                "type": "modified",
-                "created": {
-                    "welcome": "bienvenido"
-                },
-                "modified": {
-                    "hello": "holi"
-                },
-                "deleted": {}
-            },
-            "french": {
-                "type": "deleted",
-                "created": {},
-                "modified": {},
-                "deleted": {}
-            },
-            "mandarin": {
-                "type": "created",
-                "created": {
-                    "hello": "ni hao",
-                    "welcome": "huan yin"
-                },
-                "modified": {},
-                "deleted": {}
-            }
-        }
+        expected_changed_translations = read_json_file(self.basic_expected_output)
 
         changed_translations = self.dp.get_changed_translations()
         self.assertEqual(changed_translations, expected_changed_translations)

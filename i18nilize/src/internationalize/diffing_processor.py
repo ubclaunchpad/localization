@@ -132,8 +132,8 @@ class DiffingProcessor():
         original_language_location = self.diff_state_files_dir + "\\" + file_name
         current_language_location = self.curr_translation_files_dir + "\\" + file_name
 
-        original_language = read_language(original_language_location)
-        current_language = read_language(current_language_location)
+        original_language = read_json_file(original_language_location)
+        current_language = read_json_file(current_language_location)
 
         # find modified and newly added translations
         for word, translation in current_language.items():
@@ -151,7 +151,7 @@ class DiffingProcessor():
     
     def add_language(self, file_name, changed_translations):
         current_language_location = self.curr_translation_files_dir + "\\" + file_name
-        current_language = read_language(current_language_location)
+        current_language = read_json_file(current_language_location)
 
         for word, translation in current_language.items():
             changed_translations[CREATED][word] = translation
@@ -194,13 +194,14 @@ def compute_hashes(directory):
     return hash_dict
 
 """
-Reads a language file given the directory and returns json object
+Reads a file given the directory and returns json object
+Expects file to be in json format
 """
-def read_language(directory):
+def read_json_file(directory):
     try:
         with open(directory, "r") as file:
-            language = json.load(file)
-            return language
+            json_object = json.load(file)
+            return json_object
     except FileNotFoundError:
         print(f"File not found: {directory}")
         raise

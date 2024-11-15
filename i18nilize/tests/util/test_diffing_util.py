@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from src.internationalize.diffing_processor import read_language
+from src.internationalize.diffing_processor import read_json_file
 
 class DiffingTestUtil():
     def __init__(self, test_directory):
@@ -25,7 +25,7 @@ class DiffingTestUtil():
     def bulk_modify_test_data(self, directory):
         file_names = os.listdir(directory)
         for file_name in file_names:
-            language_data = read_language(directory + file_name)
+            language_data = read_json_file(directory + file_name)
             with open(self.test_directory + file_name, 'w') as json_file:
                 json.dump(language_data, json_file, indent=4)
 
@@ -34,6 +34,7 @@ class DiffingTestUtil():
     Might already be implemented in PIP package
     """
     def modify_test_data(self, language, word, translation):
+        print("NEEDS TO BE IMPLEMENTED")
         pass
 
     def clear_test_data(self):
