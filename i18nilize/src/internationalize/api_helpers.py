@@ -1,4 +1,4 @@
-# token_manager.py
+# api_helpers.py
 from internationalize.helpers import generate_file
 from core.i18nilize.services.locale import get_default_language
 import globals
