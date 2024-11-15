@@ -8,19 +8,21 @@ from src.internationalize.diffing_processor import compute_hashes, read_json_fil
 
 class TestDiffing(unittest.TestCase):
     def setUp(self):
-        # main directory for diffing tests
-        self.test_data_location = "tests/resources/diffing_algorithm/"
-
         # 'mock' translations folder to mimic real user interaction
-        self.test_translations_dir = self.test_data_location + "test_translations/"
+        self.test_translations_dir = "tests/resources/diffing_algorithm/test_translations/"
 
-        """
-        I'm not sure if we should set up the basic test for every test we run in this file
-        May need to refactor to allow more complex tests to be initialized too
-        """
-        self.basic_initial_data_location = self.test_data_location + "basic_test/initial_translations/"
-        self.basic_modified_data_location = self.test_data_location + "basic_test/modified_translations/"
-        self.basic_expected_output = self.test_data_location + "basic_test/expected_output.json"
+        # main directory for diffing tests
+        self.test_data_location = "tests/resources/diffing_algorithm/all_tests/"
+
+        # standardized names for a test folder
+        self.initial_translations_dir = "/initial_translations/"
+        self.modified_translation_dir = "/modified_translations/"
+        self.expected_output_file = "/expected_output.json"
+
+        # default test data to basic tests
+        self.basic_initial_data_location = self.test_data_location + "basic_test" + self.initial_translations_dir
+        self.basic_modified_data_location = self.test_data_location + "basic_test" + self.modified_translation_dir
+        self.basic_expected_output = self.test_data_location + "basic_test" + self.expected_output_file
 
         # initialize util class
         self.util = DiffingTestUtil(self.test_translations_dir)
