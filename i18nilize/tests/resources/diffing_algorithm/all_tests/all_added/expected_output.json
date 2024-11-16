@@ -1,0 +1,40 @@
+{
+    "italian": {
+        "type": "created",
+        "created": {
+            "hello": "bonjourno",
+            "thanks": "grazie",
+            "welcome": "benvenuto"
+        },
+        "modified": {},
+        "deleted": {}
+    },
+    "spanish": {
+        "type": "created",
+        "created": {
+            "hello": "hola",
+            "thanks": "gracias"
+        },
+        "modified": {},
+        "deleted": {}
+    },
+    "french": {
+        "type": "created",
+        "created": {
+            "hello": "bonjour",
+            "thanks": "merci"
+        },
+        "modified": {},
+        "deleted": {}
+    },
+    "portugese": {
+        "type": "created",
+        "created": {
+            "hello": "ola",
+            "thanks": "obrigado",
+            "welcome": "Bem-vindo"
+        },
+        "modified": {},
+        "deleted": {}
+    }
+}
