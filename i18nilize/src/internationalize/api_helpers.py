@@ -1,40 +1,52 @@
 # api_helpers.py
-from core.i18nilize.services import translation_processor
-from core.i18nilize.views import TokenView
-from . import globals
-from rest_framework.request import Request
-from django.http import HttpRequest
 
+import requests
+from . import globals  
+import sys
 
 def create_token():
-    http_request = HttpRequest()
-    http_request.method = 'POST'
-    
-    request = Request(http_request)
+    """
+    Creates a new token by making a POST request to the central API.
+    """
+    url = "http://localhost:8000/api/token/"  # Fixed double slash
+    try:
+        response = requests.post(url)
+        if response.status_code == 201:
+            token_value = response.json().get("value")
+            globals.token.value = token_value  # Update the value attribute
+            print("Token set.")
+        else:
+            raise Exception(f"Failed to retrieve token. Status code: {response.status_code}")
+    except requests.RequestException as e:
+        raise Exception(f"HTTP Request failed: {e}")
 
-    token_view = TokenView()
-    response = token_view.post(request)
-
-    if response.status_code == 201:
-        globals.token = response.data.get("value")
-        print("Token set.")
-    else:
-        raise Exception(f"Failed to retrieve token. Status code: {response.status_code}")
-    
 def fetch_translation_data(language):
-    token = globals.token
+    """
+    Fetches translation data for the specified language using the token.
+    """
+    token = globals.token.value  # Access the value attribute
     if not token:
         print("Token not found. Creating a new token...")
         create_token()
-        token = globals.token
+        token = globals.token.value
         if not token:
             raise Exception("Failed to create token.")
         
     if not language:
         raise Exception("Language parameter is required.")
     
-    translations = translation_processor.get_translations_by_language(language, token)
-    if not translations:
-        raise Exception(f"No translations found for language: {language}")
-    
-    print(f"Generated translation data for language: {language}")
+    url = f"http://localhost:8000/api/translations/?language={language}"  # Fixed double slash
+    headers = {
+        'Authorization': f'Token {token}'
+    }
+    try:
+        response = requests.get(url, headers=headers)
+        if response.status_code == 200:
+            translations = response.json()
+            print(f"Generated translation data for language: {language}")
+            return translations
+        else:
+            print(f"Generated translation data for language: {language}")
+            raise Exception(f"No translations found for language: {language}")
+    except requests.RequestException as e:
+        raise Exception(f"HTTP Request failed: {e}")
