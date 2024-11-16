@@ -27,7 +27,6 @@ class TestCLI(unittest.TestCase):
     def test_add_word_language_exists(self):
         existing_language = "French"
         file_path = os.path.join(self.languages_dir, f"{existing_language.lower()}.json")
-        self.assertTrue(os.path.exists(file_path))
 
         # save original state
         with open(file_path, "r") as file:
@@ -48,7 +47,6 @@ class TestCLI(unittest.TestCase):
     def test_update_word_language_exists(self):
         existing_language = "French"
         file_path = os.path.join(self.languages_dir, f"{existing_language.lower()}.json")
-        self.assertTrue(os.path.exists(file_path))
 
         # save original state
         with open(file_path, "r") as file:
@@ -69,7 +67,7 @@ class TestCLI(unittest.TestCase):
     @patch('builtins.print')
     def test_add_word_language_does_not_exist(self, mock_print):
         with self.assertRaises(SystemExit) as context:
-            add_update_translated_word("NonExistentLanguage", "hello", "ciao")
+            add_update_translated_word("NonExistentLanguage", "a", "b")
         self.assertTrue(context.exception.code, 1)
 
         mock_print.assert_called_once_with("Error: Language 'NonExistentLanguage' does not exist. Add the language before adding a translation.")
