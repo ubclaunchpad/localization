@@ -21,7 +21,7 @@ def create_token():
     else:
         raise Exception(f"Failed to retrieve token. Status code: {response.status_code}")
     
-def generate_translation_file(language):
+def fetch_translation_data(language):
     token = globals.token
     if not token:
         print("Token not found. Creating a new token...")
