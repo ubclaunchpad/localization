@@ -28,7 +28,7 @@ jobs:
         pip install -r requirements.txt
     - name: Install Pip Package Dependencies
       run: |
-        cd ../i18nilize
+        cd i18nilize
         python -m pip install --upgrade pip
         pip install -e .
     - name: Run Django Tests
