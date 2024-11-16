@@ -25,6 +25,8 @@ class DiffingTestUtil():
     def bulk_modify_test_data(self, directory):
         file_names = os.listdir(directory)
         for file_name in file_names:
+            if file_name == ".gitkeep":
+                continue
             language_data = read_json_file(os.path.join(directory, file_name))
             with open(os.path.join(self.test_directory, file_name), 'w') as json_file:
                 json.dump(language_data, json_file, indent=4)
