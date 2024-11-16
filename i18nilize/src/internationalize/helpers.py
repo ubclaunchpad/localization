@@ -1,8 +1,13 @@
 import json
+<<<<<<< HEAD
 import sys
 
 # Should this be removed?
 DEFAULT_PATH = 'src/internationalize/resources/languages.json'
+=======
+import os
+import requests
+>>>>>>> main
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -92,31 +97,29 @@ def get_token(file_path):
 
 # Input: a JSON object
 # Output: None, but creates a local JSON file containing the object
-def create_json(json_object):
-    with open("src/internationalize/jsonFile/translations.json", "w") as outfile:
+def create_json(json_object, language):
+    base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(base_dir, 'languages', f'{language}.json')
+    with open(file_path, 'w') as outfile:
         outfile.write(json_object)
 
-# Input: None (for now)
+# Input: language
 # Output: None, but creates a local JSON file containing translations
-def generate_file():
-    file_content = {
-        "Token": "85124f79-0829-4b80-8b5c-d52700d86e46",
-        "translations" : [{
-				"language": "French",
-				"hello": "bonjour",
-				"No": "Non",
-				"Why": "pourquoi",
-			},
-			{
-				"language": "Spanish",
-				"hello": "Hola",
-			},
-		]
-    }
+def generate_file(language, token):
+    url = 'http://localhost:8000/api/translations'
+    params = {'language': language}
+    headers = {'token': token}
+    response = requests.get(url, params=params, headers=headers)
 
+    if response.status_code != 200:
+        print(f'Error: {response.status_code}.', response.json()['error'])
+        return
+    
+    file_content = response.json() 
+    
     # transforms the dictionary object above into a JSON object
     json_object = json.dumps(file_content, indent=4)
-    create_json(json_object)
+    create_json(json_object, language)
 
 # make hashmap from translations
 def make_translation_map(data):

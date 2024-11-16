@@ -1,0 +1,2 @@
+[console_scripts]
+i18nilize = i18nilize.src.internationalize.command_line:cli

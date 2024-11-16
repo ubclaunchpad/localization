@@ -134,6 +134,23 @@ class ProcessTranslationsView(APIView):
                 status=status.HTTP_201_CREATED
             )
 
+    @require_valid_token
+    def get(self, request):
+        """
+        Fetch translations for a given language.
+        """
+        token = request.token
+        language = request.query_params.get('language')
+
+        translations = tp.get_translations_by_language(language, token)
+        if not translations:
+            return Response(
+                {'error': f'No translations found for {language}.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        return Response(translations, status=status.HTTP_200_OK)
+
 class TranslationView(APIView):
     """
     CRUD endpoint to read single translation
