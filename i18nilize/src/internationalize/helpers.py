@@ -3,7 +3,7 @@ import sys
 import os
 import requests
 
-DEFAULT_PATH = 'src/internationalize/resources/languages.json'
+DEFAULT_PATH = 'src/internationalize/resources/languages.json' # to be removed after refactoring
 LANGUAGES_DIR = 'src/internationalize/languages'
 
 # Function to parse json file, given its path
@@ -36,26 +36,20 @@ def add_language(language):
         json.dump(initial_content, file, indent=4)
     print(f"Language added.")
 
-# // MUST BE REFACTORED
 # Adds/updates a translated word under the given language in the default JSON file
 def add_update_translated_word(language, original_word, translated_word):
-    data = get_json(DEFAULT_PATH)
-    translations = data.get('translations', [])
+    file_path = os.path.join(LANGUAGES_DIR, f"{language.lower()}.json")
 
-    language_exists = False
-    for translation in translations:
-        if translation.get('language') == language:
-            language_exists = True
-            translation[original_word] = translated_word
-
-            with open(DEFAULT_PATH, 'w') as file:
-                json.dump(data, file, indent=4)
-
-            break
-
-    if not language_exists:
+    if not os.path.exists(file_path):
         print(f"Error: Language '{language}' does not exist. Add the language before adding a translation.")
         sys.exit(1)
+    
+    data = get_json(file_path)
+
+    data[original_word] = translated_word
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+    print(f"{original_word}: {translated_word} added to translations.")
 
 # // MUST BE REFACTORED
 # Deletes a translated word
