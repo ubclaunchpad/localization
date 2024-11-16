@@ -10,13 +10,14 @@ from src.internationalize.diffing_processor import compute_hashes, read_json_fil
 class TestDiffing(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.CRITICAL)
+        logging.getLogger('dirsync').disabled = True
 
         # 'mock' translations folder to mimic real user interaction
-        cls.test_translations_dir = "tests/resources/diffing_algorithm/test_translations"
+        cls.test_translations_dir = os.path.join("tests", "resources", "diffing_algorithm", "test_translations")
 
         # main directory for diffing tests
-        cls.test_data_location = "tests/resources/diffing_algorithm/all_tests"
+        cls.test_data_location = os.path.join("tests", "resources", "diffing_algorithm", "all_tests")
 
         # standardized names for a test folder
         cls.initial_translations_dir = "initial_translations"
