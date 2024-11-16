@@ -1,13 +1,10 @@
 import json
-<<<<<<< HEAD
 import sys
-
-# Should this be removed?
-DEFAULT_PATH = 'src/internationalize/resources/languages.json'
-=======
 import os
 import requests
->>>>>>> main
+
+DEFAULT_PATH = 'src/internationalize/resources/languages.json'
+LANGUAGES_DIR = 'src/internationalize/languages'
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -26,25 +23,20 @@ def get_json(file_path):
         raise e
     return data
 
-# Adds a language to the default JSON file
+# Adds a json file corresponding to the added language
 def add_language(language):
-    # filename = f"{language.lower()}.json"
-    # file_path = os.path.join('i18nilize/src/internationalize/resources', filename)
+    os.makedirs(LANGUAGES_DIR, exist_ok=True)
+    file_path = os.path.join(LANGUAGES_DIR, f"{language.lower()}.json")
 
-    data = get_json(DEFAULT_PATH)
-    translations = data.get('translations', [])
+    if os.path.exists(file_path):
+        return
+    
+    initial_content = {}
+    with open(file_path, 'w') as file:
+        json.dump(initial_content, file, indent=4)
+    print(f"Language added.")
 
-    # Check if the language already exists in the translations list
-    if not any(t.get('language') == language for t in translations):
-        # Add new language as a dictionary in the list
-        new_language = {"language": language}
-        translations.append(new_language)
-        data['translations'] = translations
-
-        # open and write
-        with open(DEFAULT_PATH, 'w') as file:
-            json.dump(data, file, indent=4)
-
+# // MUST BE REFACTORED
 # Adds/updates a translated word under the given language in the default JSON file
 def add_update_translated_word(language, original_word, translated_word):
     data = get_json(DEFAULT_PATH)
@@ -65,6 +57,7 @@ def add_update_translated_word(language, original_word, translated_word):
         print(f"Error: Language '{language}' does not exist. Add the language before adding a translation.")
         sys.exit(1)
 
+# // MUST BE REFACTORED
 # Deletes a translated word
 def delete_translation(language, original_word, translated_word):
     data = get_json(DEFAULT_PATH)
@@ -116,7 +109,7 @@ def generate_file(language, token):
         return
     
     file_content = response.json() 
-    
+
     # transforms the dictionary object above into a JSON object
     json_object = json.dumps(file_content, indent=4)
     create_json(json_object, language)
@@ -133,3 +126,4 @@ def make_translation_map(data):
 # get translations from hashmap given the language
 def get_translation(translations_map, language):
     return translations_map.get(language, "Translation not found")
+

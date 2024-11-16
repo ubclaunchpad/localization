@@ -9,93 +9,25 @@ from src.internationalize.helpers import get_json, make_translation_map, get_tra
 class TestCLI(unittest.TestCase):                
     def setUp(self):
         self.TEST_JSON_PATH = 'src/internationalize/resources/languages.json'
-        with open(self.TEST_JSON_PATH, 'r') as file:
-            self.original_json = json.load(file)
+        self.languages_dir = 'src/internationalize/languages'
+        os.makedirs(self.languages_dir, exist_ok=True)
+
+        # with open(self.TEST_JSON_PATH, 'r') as file:
+            # self.original_json = json.load(file)
     
     def tearDown(self):
         with open(self.TEST_JSON_PATH, 'w') as file:
             json.dump(self.original_json, file, indent=4)
 
-    def test_add_language(self):
-        data = get_json(self.TEST_JSON_PATH)
+    def test_add_new_language(self):
+        new_language = "Japanese"
+        add_language(new_language)
+        new_language_path = os.path.join(self.languages_dir, f"{new_language.lower()}.json")
+        self.assertTrue(os.path.exists(new_language_path))
 
-        print("Checking Number of Translations:")
-        self.assertEqual(data['Token'], "85124f79-0829-4b80-8b5c-d52700d86e46")
-        self.assertEqual(len(data['translations']), 2)
-
-        print("Checking French Translations:")
-        french_translation = data['translations'][0]
-        self.assertEqual(french_translation['language'], "French")
-        self.assertEqual(french_translation['hello'], "bonjour")
-        self.assertEqual(french_translation['No'], "Non")
-        self.assertEqual(french_translation['Why'], "pourquoi")
-
-        print("Checking Spanish Translations:")
-        spanish_translation = data['translations'][1]
-        self.assertEqual(spanish_translation['language'], "Spanish")
-        self.assertEqual(spanish_translation['hello'], "Hola")
-
-        add_language("Korean")
-        data = get_json(self.TEST_JSON_PATH)
-        self.assertEqual(data['Token'], "85124f79-0829-4b80-8b5c-d52700d86e46")
-        self.assertEqual(len(data['translations']), 3)
-
-        french_translation = data['translations'][0]
-        self.assertEqual(french_translation['language'], "French")
-        self.assertEqual(french_translation['hello'], "bonjour")
-        self.assertEqual(french_translation['No'], "Non")
-        self.assertEqual(french_translation['Why'], "pourquoi")
-
-        spanish_translation = data['translations'][1]
-        self.assertEqual(spanish_translation['language'], "Spanish")
-        self.assertEqual(spanish_translation['hello'], "Hola")
-
-        korean_translation = data['translations'][2]
-        self.assertEqual(korean_translation['language'], "Korean")
-        print("Test passed!")
-
-    def test_add_existing_language(self):
-        data = get_json(self.TEST_JSON_PATH)
-
-        self.assertEqual(data['Token'], "85124f79-0829-4b80-8b5c-d52700d86e46")
-        self.assertEqual(len(data['translations']), 2)
-
-        french_translation = data['translations'][0]
-        self.assertEqual(french_translation['language'], "French")
-        self.assertEqual(french_translation['hello'], "bonjour")
-        self.assertEqual(french_translation['No'], "Non")
-        self.assertEqual(french_translation['Why'], "pourquoi")
-
-        spanish_translation = data['translations'][1]
-        self.assertEqual(spanish_translation['language'], "Spanish")
-        self.assertEqual(spanish_translation['hello'], "Hola")
-
-        add_language("Spanish")
-        data = get_json(self.TEST_JSON_PATH)
-        self.assertEqual(data['Token'], "85124f79-0829-4b80-8b5c-d52700d86e46")
-        self.assertEqual(len(data['translations']), 2)
-
-        french_translation = data['translations'][0]
-        self.assertEqual(french_translation['language'], "French")
-        self.assertEqual(french_translation['hello'], "bonjour")
-        self.assertEqual(french_translation['No'], "Non")
-        self.assertEqual(french_translation['Why'], "pourquoi")
-
-        spanish_translation = data['translations'][1]
-        self.assertEqual(spanish_translation['language'], "Spanish")
-        self.assertEqual(spanish_translation['hello'], "Hola")
-    
-    def test_add_word_language_exists(self):
-        data = get_json(self.TEST_JSON_PATH)
-        french_translation = data['translations'][0]
-        self.assertEqual(len(french_translation), 4)
-
-        add_update_translated_word("French", "good", "bien")
-
-        data = get_json(self.TEST_JSON_PATH)
-        french_translation = data['translations'][0]
-        self.assertEqual(len(french_translation), 5)
-        self.assertEqual(french_translation['good'], "bien")
+        with open(new_language_path, 'r') as file:
+            data = json.load(file)
+        self.assertEqual(data, {})
 
     def test_update_word_language_exists(self):
         data = get_json(self.TEST_JSON_PATH)
