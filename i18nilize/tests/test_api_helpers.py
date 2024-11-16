@@ -1,13 +1,16 @@
 # test_api_helpers.py
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 import os
-import json
 import sys
 
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 from internationalize.api_helpers import create_token, fetch_translation_data
-from src.internationalize import globals
+from internationalize.globals import token 
 
 class TestAPIHelpers(unittest.TestCase):
 
@@ -15,10 +18,12 @@ class TestAPIHelpers(unittest.TestCase):
         self.languages_dir = "src/internationalize/languages"
         os.makedirs(self.languages_dir, exist_ok=True)
 
-        self.original_token = globals.token
+        # backup the original token value
+        self.original_token_value = token.value
 
     def tearDown(self):
-        globals.token = self.original_token
+        # restore the original token value
+        token.value = self.original_token_value
 
         # clean up any created language files
         if os.path.exists(self.languages_dir):
@@ -27,113 +32,163 @@ class TestAPIHelpers(unittest.TestCase):
                     os.remove(os.path.join(self.languages_dir, filename))
 
 
-    @patch('src.internationalize.api_helpers.TokenView')
-    def test_create_token_success(self, mock_token_view):
+    @patch('internationalize.api_helpers.requests.post')
+    def test_create_token_success(self, mock_post):
+        """
+        Test that create_token() successfully creates a token and sets it in globals.
+        """
         mock_response = MagicMock()
         mock_response.status_code = 201
-        mock_response.data = {'value': 'test-token'}
-        mock_token_view_instance = MagicMock()
-        mock_token_view_instance.post.return_value = mock_response
-        mock_token_view.return_value = mock_token_view_instance
+        mock_response.json.return_value = {'value': 'test-token'}
+        mock_post.return_value = mock_response
 
-        with patch('builtins.print') as mock_print:
+        with patch('builtins.print') as mock_print:  
             create_token()
 
-            mock_token_view_instance.post.assert_called_once()
-            self.assertEqual(globals.token, 'test-token')
+            mock_post.assert_called_once_with("http://localhost:8000/api/token/")
+            self.assertEqual(token.value, 'test-token')
             mock_print.assert_called_once_with("Token set.")
 
-    @patch('src.internationalize.api_helpers.TokenView')
-    def test_create_token_failure(self, mock_token_view):
+    @patch('internationalize.api_helpers.requests.post')
+    def test_create_token_failure(self, mock_post):
+        """
+        Test that create_token() raises an exception when API call fails.
+        """
         mock_response = MagicMock()
         mock_response.status_code = 400
-        mock_response.data = {'error': 'Bad Request'}
-        mock_token_view_instance = MagicMock()
-        mock_token_view_instance.post.return_value = mock_response
-        mock_token_view.return_value = mock_token_view_instance
+        mock_response.json.return_value = {'error': 'Bad Request'}
+        mock_post.return_value = mock_response
 
-        with patch('builtins.print') as mock_print:
+        with patch('builtins.print') as mock_print:  
             with self.assertRaises(Exception) as context:
                 create_token()
 
-            mock_token_view_instance.post.assert_called_once()
+            mock_post.assert_called_once_with("http://localhost:8000/api/token/") 
             self.assertIn("Failed to retrieve token. Status code: 400", str(context.exception))
-            mock_print.assert_not_called()  # no print on failure as per function definition
+            mock_print.assert_not_called()
 
-    @patch('src.internationalize.api_helpers.translation_processor.get_translations_by_language')
-    @patch('src.internationalize.api_helpers.create_token')
-    def test_fetch_translation_data_token_exists(self, mock_create_token, mock_get_translations):
-        globals.token = 'existing-token'
 
-        mock_get_translations.return_value = {'hello': 'hola'}
+    @patch('internationalize.api_helpers.requests.get')
+    @patch('internationalize.api_helpers.create_token')
+    def test_fetch_translation_data_token_exists(self, mock_create_token, mock_get):
+        """
+        Test that fetch_translation_data() fetches translations when token exists.
+        """
+        token.value = 'existing-token'
 
-        with patch('builtins.print') as mock_print:
-            fetch_translation_data('Spanish')
+        mock_get_response = MagicMock()
+        mock_get_response.status_code = 200
+        mock_get_response.json.return_value = {'hello': 'hola'}
+        mock_get.return_value = mock_get_response
+
+        with patch('builtins.print') as mock_print:  
+            translations = fetch_translation_data('Spanish')
 
             mock_create_token.assert_not_called()
-            mock_get_translations.assert_called_once_with('Spanish', 'existing-token')
+            mock_get.assert_called_once_with(
+                "http://localhost:8000/api/translations/?language=Spanish",
+                headers={'Authorization': 'Token existing-token'}
+            )
             mock_print.assert_called_once_with("Generated translation data for language: Spanish")
+            self.assertEqual(translations, {'hello': 'hola'})
 
-    @patch('src.internationalize.api_helpers.translation_processor.get_translations_by_language')
-    @patch('src.internationalize.api_helpers.create_token')
-    def test_fetch_translation_data_token_missing_and_created_successfully(self, mock_create_token, mock_get_translations):
-        globals.token = ''
+    @patch('internationalize.api_helpers.requests.get')
+    @patch('internationalize.api_helpers.requests.post')
+    def test_fetch_translation_data_token_missing_and_created_successfully(self, mock_post, mock_get):
+        """
+        Test that fetch_translation_data() creates a token if missing and fetches translations successfully.
+        """
+        token.value = ''
 
-        def side_effect_create_token():
-            globals.token = 'new-token'
-            print("Token set.")
-        mock_create_token.side_effect = side_effect_create_token
+        mock_post_response = MagicMock()
+        mock_post_response.status_code = 201
+        mock_post_response.json.return_value = {'value': 'new-token'}
+        mock_post.return_value = mock_post_response
 
-        mock_get_translations.return_value = {'hello': 'hola'}
+        mock_get_response = MagicMock()
+        mock_get_response.status_code = 200
+        mock_get_response.json.return_value = {'hello': 'hola'}
+        mock_get.return_value = mock_get_response
 
         with patch('builtins.print') as mock_print:
-            fetch_translation_data('Spanish')
+            translations = fetch_translation_data('Spanish')
 
-            mock_create_token.assert_called_once()
-            mock_get_translations.assert_called_once_with('Spanish', 'new-token')
-            expected_calls = [patch.call("Token not found. Creating a new token..."),
-                              patch.call("Token set."),
-                              patch.call("Generated translation data for language: Spanish")]
+            mock_post.assert_called_once_with("http://localhost:8000/api/token/")
+            mock_get.assert_called_once_with(
+                "http://localhost:8000/api/translations/?language=Spanish",
+                headers={'Authorization': 'Token new-token'}
+            )
+            expected_calls = [
+                call("Token not found. Creating a new token..."),
+                call("Token set."),
+                call("Generated translation data for language: Spanish")
+            ]
             mock_print.assert_has_calls(expected_calls, any_order=False)
+            self.assertEqual(token.value, 'new-token')
+            self.assertEqual(translations, {'hello': 'hola'})
 
-    @patch('src.internationalize.api_helpers.translation_processor.get_translations_by_language')
-    @patch('src.internationalize.api_helpers.create_token')
-    def test_fetch_translation_data_token_missing_and_creation_fails(self, mock_create_token, mock_get_translations):
-        globals.token = ''
+    @patch('internationalize.api_helpers.requests.get')
+    @patch('internationalize.api_helpers.requests.post')
+    def test_fetch_translation_data_token_missing_and_creation_fails(self, mock_post, mock_get):
+        """
+        Test that fetch_translation_data() raises an exception if token creation fails.
+        """
+        token.value = ''
 
-        mock_create_token.side_effect = Exception("Failed to retrieve token.")
+        mock_post_response = MagicMock()
+        mock_post_response.status_code = 400
+        mock_post_response.json.return_value = {'error': 'Bad Request'}
+        mock_post.return_value = mock_post_response
 
         with patch('builtins.print') as mock_print:
             with self.assertRaises(Exception) as context:
                 fetch_translation_data('Spanish')
 
-            mock_create_token.assert_called_once()
-            mock_get_translations.assert_not_called()
-            mock_print.assert_called_once_with("Token not found. Creating a new token...")
+            mock_post.assert_called_once_with("http://localhost:8000/api/token/") 
+            mock_get.assert_not_called()
+            expected_calls = [
+                call("Token not found. Creating a new token...")
+            ]
+            mock_print.assert_has_calls(expected_calls, any_order=False)
+            self.assertEqual(token.value, '')  # token remains empty
+            self.assertIn("Failed to retrieve token. Status code: 400", str(context.exception))
 
     def test_fetch_translation_data_missing_language(self):
-        globals.token = 'existing-token'
+        """
+        Test that fetch_translation_data() raises an exception when language parameter is missing.
+        """
+        token.value = 'existing-token'
 
         with patch('builtins.print') as mock_print:
             with self.assertRaises(Exception) as context:
-                fetch_translation_data('')  # Missing language
+                fetch_translation_data('')  # missing language
 
             self.assertIn("Language parameter is required.", str(context.exception))
-            mock_print.assert_not_called()  # No print as per function definition
+            mock_print.assert_not_called()
 
-    @patch('src.internationalize.api_helpers.translation_processor.get_translations_by_language')
-    def test_fetch_translation_data_no_translations_found(self, mock_get_translations):
-        globals.token = 'existing-token'
+    @patch('internationalize.api_helpers.requests.get')
+    def test_fetch_translation_data_no_translations_found(self, mock_get):
+        """
+        Test that fetch_translation_data() raises an exception when no translations are found.
+        """
+        token.value = 'existing-token'
 
-        mock_get_translations.return_value = {}
+        mock_get_response = MagicMock()
+        mock_get_response.status_code = 404  # assuming 404 for no translations
+        mock_get_response.json.return_value = {'error': 'No translations found'}
+        mock_get.return_value = mock_get_response
 
         with patch('builtins.print') as mock_print:
             with self.assertRaises(Exception) as context:
                 fetch_translation_data('Spanish')
 
-            mock_get_translations.assert_called_once_with('Spanish', 'existing-token')
+            mock_get.assert_called_once_with(
+                "http://localhost:8000/api/translations/?language=Spanish",
+                headers={'Authorization': 'Token existing-token'}
+            )
+            mock_print.assert_called_once_with("Generated translation data for language: Spanish")
+            self.assertEqual(token.value, 'existing-token')  # token remains unchanged
             self.assertIn("No translations found for language: Spanish", str(context.exception))
-            mock_print.assert_called_once_with("Generated translation data for language: Spanish")  # prints even if no translations, but raises exception
 
-    if __name__ == '__main__':
-        unittest.main()
+if __name__ == '__main__':
+    unittest.main()
