@@ -7,7 +7,7 @@ import json
 import sys
 
 from internationalize.api_helpers import create_token, fetch_translation_data
-import src.internationalize.globals as globals_module
+from src.internationalize import globals
 
 class TestAPIHelpers(unittest.TestCase):
 
@@ -15,10 +15,10 @@ class TestAPIHelpers(unittest.TestCase):
         self.languages_dir = "src/internationalize/languages"
         os.makedirs(self.languages_dir, exist_ok=True)
 
-        self.original_token = globals_module.token
+        self.original_token = globals.token
 
     def tearDown(self):
-        globals_module.token = self.original_token
+        globals.token = self.original_token
 
         # clean up any created language files
         if os.path.exists(self.languages_dir):
@@ -40,7 +40,7 @@ class TestAPIHelpers(unittest.TestCase):
             create_token()
 
             mock_token_view_instance.post.assert_called_once()
-            self.assertEqual(globals_module.token, 'test-token')
+            self.assertEqual(globals.token, 'test-token')
             mock_print.assert_called_once_with("Token set.")
 
     @patch('src.internationalize.api_helpers.TokenView')
@@ -63,7 +63,7 @@ class TestAPIHelpers(unittest.TestCase):
     @patch('src.internationalize.api_helpers.translation_processor.get_translations_by_language')
     @patch('src.internationalize.api_helpers.create_token')
     def test_fetch_translation_data_token_exists(self, mock_create_token, mock_get_translations):
-        globals_module.token = 'existing-token'
+        globals.token = 'existing-token'
 
         mock_get_translations.return_value = {'hello': 'hola'}
 
@@ -77,10 +77,10 @@ class TestAPIHelpers(unittest.TestCase):
     @patch('src.internationalize.api_helpers.translation_processor.get_translations_by_language')
     @patch('src.internationalize.api_helpers.create_token')
     def test_fetch_translation_data_token_missing_and_created_successfully(self, mock_create_token, mock_get_translations):
-        globals_module.token = ''
+        globals.token = ''
 
         def side_effect_create_token():
-            globals_module.token = 'new-token'
+            globals.token = 'new-token'
             print("Token set.")
         mock_create_token.side_effect = side_effect_create_token
 
@@ -99,7 +99,7 @@ class TestAPIHelpers(unittest.TestCase):
     @patch('src.internationalize.api_helpers.translation_processor.get_translations_by_language')
     @patch('src.internationalize.api_helpers.create_token')
     def test_fetch_translation_data_token_missing_and_creation_fails(self, mock_create_token, mock_get_translations):
-        globals_module.token = ''
+        globals.token = ''
 
         mock_create_token.side_effect = Exception("Failed to retrieve token.")
 
@@ -112,7 +112,7 @@ class TestAPIHelpers(unittest.TestCase):
             mock_print.assert_called_once_with("Token not found. Creating a new token...")
 
     def test_fetch_translation_data_missing_language(self):
-        globals_module.token = 'existing-token'
+        globals.token = 'existing-token'
 
         with patch('builtins.print') as mock_print:
             with self.assertRaises(Exception) as context:
@@ -123,7 +123,7 @@ class TestAPIHelpers(unittest.TestCase):
 
     @patch('src.internationalize.api_helpers.translation_processor.get_translations_by_language')
     def test_fetch_translation_data_no_translations_found(self, mock_get_translations):
-        globals_module.token = 'existing-token'
+        globals.token = 'existing-token'
 
         mock_get_translations.return_value = {}
 

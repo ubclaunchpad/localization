@@ -1,5 +1,5 @@
 # api_helpers.py
-import globals
+from . import globals
 from core.i18nilize.views import TokenView
 from rest_framework.request import Request
 from django.http import HttpRequest
