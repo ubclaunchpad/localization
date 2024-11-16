@@ -51,27 +51,28 @@ def add_update_translated_word(language, original_word, translated_word):
         json.dump(data, file, indent=4)
     print(f"{original_word}: {translated_word} added to translations.")
 
-# // MUST BE REFACTORED
-# Deletes a translated word
+# Deletes a translated word for the given language
 def delete_translation(language, original_word, translated_word):
-    data = get_json(DEFAULT_PATH)
-    translations = data.get('translations', [])
+    file_path = os.path.join(LANGUAGES_DIR, f"{language.lower()}.json")
 
-    language_exists = False
-    for translation in translations:
-        if translation.get('language') == language:
-            language_exists = True
-            if original_word in translation and translation[original_word] == translated_word:
-                del translation[original_word]
-    
-            with open(DEFAULT_PATH, 'w') as file:
-                json.dump(data, file, indent=4)
-                
-            break
-    
-    if not language_exists:
+    if not os.path.exists(file_path):
         print(f"Error: Language '{language}' does not exist.")
         sys.exit(1)
+
+    data = get_json(file_path)
+
+    if original_word not in data:
+        print(f"Error: Original word '{original_word}' does not exist in language '{language}'.")
+        sys.exit(1)
+
+    if data[original_word] != translated_word:
+        print(f"Error: Translated word for '{original_word}' does not match '{translated_word}'.")
+        sys.exit(1)
+
+    del data[original_word]
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+    print(f"Translation for '{original_word}' deleted successfully from language '{language}'.")
 
 # Input: 
 #   - file_path: path of json file
