@@ -1,9 +1,9 @@
 # api_helpers.py
-from internationalize.helpers import generate_file
 import globals
 from core.i18nilize.views import TokenView
 from rest_framework.request import Request
 from django.http import HttpRequest
+from i18nilize.services import translation_processor as tp
 
 
 def create_token():
@@ -33,6 +33,8 @@ def generate_translation_file(language):
     if not language:
         raise Exception("Language parameter is required.")
     
-    generate_file(language, token)
-    print(f"Generated translation file for language: {language}")
-
+    translations = tp.get_translations_by_language(language, token)
+    if not translations:
+        raise Exception(f"No translations found for language: {language}")
+    
+    print(f"Generated translation data for language: {language}")
