@@ -1,7 +1,0 @@
-README.md
-setup.py
-i18nilize.egg-info/PKG-INFO
-i18nilize.egg-info/SOURCES.txt
-i18nilize.egg-info/dependency_links.txt
-i18nilize.egg-info/entry_points.txt
-i18nilize.egg-info/top_level.txt
