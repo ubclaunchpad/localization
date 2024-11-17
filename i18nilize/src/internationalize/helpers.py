@@ -4,6 +4,7 @@ import requests
 from geocoder import ip
 from geopy.geocoders import Nominatim
 from babel.languages import get_official_languages
+from . import globals
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -60,7 +61,7 @@ def get_default_language():
 def generate_file(language, token):
     if not language:
         language = get_default_language()
-    url = 'http://localhost:8000/api/translations'
+    url = globals.TRANSLATIONS_ENDPOINT
     params = {'language': language}
     headers = {'token': token}
     response = requests.get(url, params=params, headers=headers)
