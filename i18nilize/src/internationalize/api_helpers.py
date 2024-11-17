@@ -8,7 +8,7 @@ def create_token():
     """
     Creates a new token by making a POST request to the central API.
     """
-    url = "http://localhost:8000/api/token/" 
+    url = globals.TOKEN_ENDPOINT
     try:
         response = requests.post(url)
         if response.status_code == 201:
@@ -35,7 +35,7 @@ def fetch_translation_data(language):
     if not language:
         raise Exception("Language parameter is required.")
     
-    url = f"http://localhost:8000/api/translations/?language={language}" 
+    url = f"{globals.TRANSLATIONS_ENDPOINT}?language={language}" 
     headers = {
         'Authorization': f'Token {token}'
     }
