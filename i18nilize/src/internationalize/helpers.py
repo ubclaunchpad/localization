@@ -1,7 +1,8 @@
+import json
+import sys
 import os
 import requests
-
-LANGUAGES_DIR = 'src/internationalize/languages'
+from . import globals
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -22,8 +23,8 @@ def get_json(file_path):
 
 # Adds a json file corresponding to the added language
 def add_language(language):
-    os.makedirs(LANGUAGES_DIR, exist_ok=True)
-    file_path = os.path.join(LANGUAGES_DIR, f"{language.lower()}.json")
+    os.makedirs(globals.LANGUAGES_DIR, exist_ok=True)
+    file_path = os.path.join(globals.LANGUAGES_DIR, f"{language.lower()}.json")
 
     if os.path.exists(file_path):
         return
@@ -35,7 +36,7 @@ def add_language(language):
 
 # Adds/updates a translated word under the given language in the default JSON file
 def add_update_translated_word(language, original_word, translated_word):
-    file_path = os.path.join(LANGUAGES_DIR, f"{language.lower()}.json")
+    file_path = os.path.join(globals.LANGUAGES_DIR, f"{language.lower()}.json")
 
     if not os.path.exists(file_path):
         print(f"Error: Language '{language}' does not exist. Add the language before adding a translation.")
@@ -50,7 +51,7 @@ def add_update_translated_word(language, original_word, translated_word):
 
 # Deletes a translated word for the given language
 def delete_translation(language, original_word, translated_word):
-    file_path = os.path.join(LANGUAGES_DIR, f"{language.lower()}.json")
+    file_path = os.path.join(globals.LANGUAGES_DIR, f"{language.lower()}.json")
 
     if not os.path.exists(file_path):
         print(f"Error: Language '{language}' does not exist.")

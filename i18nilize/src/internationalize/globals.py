@@ -1,0 +1,1 @@
+LANGUAGES_DIR = 'src/internationalize/languages'
