@@ -1,9 +1,6 @@
-import json
-import sys
 import os
 import requests
 
-DEFAULT_PATH = 'src/internationalize/resources/languages.json' # to be removed after refactoring
 LANGUAGES_DIR = 'src/internationalize/languages'
 
 # Function to parse json file, given its path
