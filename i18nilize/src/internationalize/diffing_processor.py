@@ -36,7 +36,7 @@ class DiffingProcessor():
             # Compute all file hashes and store hashes in metadata
             all_files = os.listdir(self.diff_state_files_dir)
             all_file_hashes = compute_hashes(self.diff_state_files_dir)
-            self.update_metadata(all_files, all_file_hashes)
+            self.update_metadata(all_file_hashes)
         except FileExistsError:
             print(f"Old translations directory has already been created.")
         except PermissionError:
@@ -47,11 +47,11 @@ class DiffingProcessor():
     """
     Updates translation files with new changes and updates hashes in metadata.
     """
-    def update_to_current_state(self, changed_files_list, hash_dict):
-        self.update_metadata(changed_files_list, hash_dict)
+    def update_to_current_state(self, hash_dict):
+        self.update_metadata(hash_dict)
         self.sync_translations()
 
-    def update_metadata(self, changed_files_list, hash_dict):
+    def update_metadata(self, hash_dict):
         with open(self.metadata_file_dir, "w") as outfile:
             json.dump(hash_dict, outfile)
 
@@ -108,13 +108,7 @@ class DiffingProcessor():
 
                 if type == CREATED:
                     changed_translations[language] = self.add_language(file_name, changed_translations[language])
-
-        """
-        commented out updating metadata in this section for now
-        """
-        # # Update metadata and old state
-        # self.update_to_current_state(changed_files_list, new_hashes_dict)
-
+        
         return changed_translations
 
     """

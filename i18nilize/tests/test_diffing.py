@@ -10,7 +10,7 @@ from src.internationalize.diffing_processor import compute_hashes, read_json_fil
 class TestDiffing(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        logging.basicConfig(level=logging.CRITICAL)
+        logging.basicConfig(level=logging.INFO)
         logging.getLogger('dirsync').disabled = True
 
         # 'mock' translations folder to mimic real user interaction
@@ -73,30 +73,18 @@ class TestDiffing(unittest.TestCase):
         self.assertTrue(len(errors) == 0)
 
     def test_updating_state(self):
-        hashes = compute_hashes(self.test_translations_dir)
-        changed_files = ["italian.json", "spanish.json"]
-        self.dp.update_to_current_state(changed_files, hashes)
+        new_hashes = compute_hashes(self.basic_modified_data_location)
+        self.util.initialize_test_data(self.basic_modified_data_location)
+        self.dp.update_to_current_state(new_hashes)
+        modified_metadata = read_json_file(self.dp.metadata_file_dir)
+        self.assertEqual(new_hashes, modified_metadata)
 
-        updated_metadata = {}
-        with open(self.dp.metadata_file_dir) as file:
-            updated_metadata = json.load(file)
-
-        self.assertIsNotNone(updated_metadata["spanish"])
-        self.assertIsNotNone(updated_metadata["italian"])
-        self.assertEqual(hashes["spanish"], updated_metadata["spanish"])
-        self.assertEqual(hashes["italian"], updated_metadata["italian"])
-       
-        ### Need to finish this part of test
-        # must_exist_files = os.listdir(self.modified_translations_dir)
-        # print(must_exist_files)
-        # match, mismatch, errors = filecmp.cmpfiles(
-        #     self.modified_translations_dir,
-        #    self.dp.diff_state_files_dir,
-        #    must_exist_files,
-        #    shallow=False
-        # )
-        # print(match)
-        # self.assertTrue(len(match) == 2)
+    def test_no_updates_to_state(self):
+        hashes = compute_hashes(self.basic_initial_data_location)
+        self.util.initialize_test_data(self.basic_initial_data_location)
+        self.dp.update_to_current_state(hashes)
+        same_metadata = read_json_file(self.dp.metadata_file_dir)
+        self.assertEqual(hashes, same_metadata)
 
     def test_find_changed_files_basic(self):
         self.util.initialize_test_data(self.basic_modified_data_location)
