@@ -39,10 +39,10 @@ class TestGenerateFile(unittest.TestCase):
         mock_get.return_value = mock_response
 
         # Call the function
-        generate_file('french', self.TEST_TOKEN)
+        generate_file('french2', self.TEST_TOKEN)
 
         # Check that the file does not exist
-        expected_file_path = './src/internationalize/languages/french.json'
+        expected_file_path = './src/internationalize/languages/french2.json'
         self.assertFalse(os.path.exists(expected_file_path))
 
 if __name__ == '__main__':
