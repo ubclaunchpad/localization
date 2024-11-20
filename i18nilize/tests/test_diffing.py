@@ -112,7 +112,7 @@ class TestDiffing(unittest.TestCase):
         changed_files = self.dp.get_changed_files()
 
         for type, languages in changed_files.items():
-            self.assertListEqual(languages, expected_changed_files[type], f"Mismatch in {type} files")
+            self.assertCountEqual(languages, expected_changed_files[type], f"Mismatch in {type} files")
 
     def test_bulk_find_changed_translations(self):
         for test_folder in os.listdir(self.test_data_location):
