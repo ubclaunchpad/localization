@@ -1,6 +1,7 @@
 import json
 import sys
 import os
+import hashlib
 import requests
 from . import globals
 
@@ -138,3 +139,46 @@ def make_translation_map(data):
 def get_translation(translations_map, language):
     return translations_map.get(language, "Translation not found")
 
+"""
+Computes 256-bit hash for given content
+"""
+def compute_hash(file_content):
+    hash = hashlib.sha256()
+    hash.update(file_content)
+    return hash.hexdigest()
+
+"""
+Computes hashes for all files in a directory
+"""
+def compute_hashes(directory):
+    hash_dict = {}
+    files = os.listdir(directory)
+    for file_name in files:
+        path = directory + "/" + file_name
+        
+        # Read file as byte buffer for hashing
+        with open(path, "rb") as file:
+            file_name_no_ext = file_name.split(".")[0]
+            file_content = file.read()
+            file_hash = compute_hash(file_content)
+            hash_dict[file_name_no_ext] = file_hash
+
+    return hash_dict
+
+"""
+Reads a file given the directory and returns json object
+Expects file to be in json format
+"""
+def read_json_file(directory):
+    try:
+        with open(directory, "r") as file:
+            json_object = json.load(file)
+            return json_object
+    except FileNotFoundError:
+        print(f"File not found: {directory}")
+        raise
+    except IOError:
+        print(f"An error occurred while trying to read the file: {directory}")
+        raise
+    except Exception as e:
+        print(f"An exception occured: {e}") 

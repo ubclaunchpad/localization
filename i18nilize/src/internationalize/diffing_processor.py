@@ -2,6 +2,7 @@ import os
 import hashlib
 import json
 from dirsync import sync
+from src.internationalize.helpers import compute_hash, compute_hashes, read_json_file
 
 JSON_EXTENSION = ".json"
 
@@ -154,42 +155,3 @@ class DiffingProcessor():
         changed_translations[MODIFIED] = {}
         changed_translations[DELETED] = {}
         return changed_translations
-
-
-"""
-Helper functions    
-"""
-
-def compute_hash(file_content):
-    hash = hashlib.sha256()
-    hash.update(file_content)
-    return hash.hexdigest()
-
-def compute_hashes(directory):
-    hash_dict = {}
-    files = os.listdir(directory)
-    for file_name in files:
-        path = directory + "/" + file_name
-        
-        # Read file as byte buffer for hashing
-        with open(path, "rb") as file:
-            file_name_no_ext = file_name.split(".")[0]
-            file_content = file.read()
-            file_hash = compute_hash(file_content)
-            hash_dict[file_name_no_ext] = file_hash
-
-    return hash_dict
-
-def read_json_file(directory):
-    try:
-        with open(directory, "r") as file:
-            json_object = json.load(file)
-            return json_object
-    except FileNotFoundError:
-        print(f"File not found: {directory}")
-        raise
-    except IOError:
-        print(f"An error occurred while trying to read the file: {directory}")
-        raise
-    except Exception as e:
-        print(f"An exception occured: {e}") 
