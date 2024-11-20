@@ -159,6 +159,7 @@ class DiffingProcessor():
 """
 Helper functions    
 """
+
 def compute_hash(file_content):
     hash = hashlib.sha256()
     hash.update(file_content)
@@ -179,10 +180,6 @@ def compute_hashes(directory):
 
     return hash_dict
 
-"""
-Reads a file given the directory and returns json object
-Expects file to be in json format
-"""
 def read_json_file(directory):
     try:
         with open(directory, "r") as file:
