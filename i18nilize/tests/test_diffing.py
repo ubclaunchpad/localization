@@ -86,6 +86,22 @@ class TestDiffing(unittest.TestCase):
         same_metadata = read_json_file(self.dp.metadata_file_dir)
         self.assertEqual(hashes, same_metadata)
 
+    def test_synchronization(self):
+        # Remove initial translations
+        if os.path.exists(self.dp.diff_state_files_dir):
+            shutil.rmtree(self.dp.diff_state_files_dir)
+        os.mkdir(self.dp.diff_state_files_dir)
+        
+        curr_state_files = os.listdir(self.dp.curr_translation_files_dir)
+        old_state_files = os.listdir(self.dp.diff_state_files_dir)
+        self.assertEqual(len(curr_state_files), 4)
+        self.assertEqual(len(old_state_files), 0)
+
+        self.dp.sync_translations()
+        modified_old_state_files = os.listdir(self.dp.diff_state_files_dir)
+        self.assertEqual(len(modified_old_state_files), 4)
+        
+
     def test_find_changed_files_basic(self):
         self.util.initialize_test_data(self.basic_modified_data_location)
         expected_changed_files = {
