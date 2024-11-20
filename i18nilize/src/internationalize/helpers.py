@@ -1,6 +1,10 @@
 import json
 import os
 import requests
+from geocoder import ip
+from geopy.geocoders import Nominatim
+from babel.languages import get_official_languages
+from . import globals
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -36,10 +40,28 @@ def create_json(json_object, language):
     with open(file_path, 'w') as outfile:
         outfile.write(json_object)
 
+# Input: None
+# Output: Default language based on user's IP address
+def get_default_language():
+    # get user's coordinates based on IP address
+    g = ip('me')
+    coord = str(g.latlng[0]) + ", " + str(g.latlng[1])
+
+    # convert coordinates to country code
+    geolocator = Nominatim(user_agent="localization_launchpad")
+    location = geolocator.reverse(coord, exactly_one=True)
+    address = location.raw['address']
+    country_code = address["country_code"]
+
+    # pick the first (most popular) language
+    return get_official_languages(country_code)[0]
+
 # Input: language
 # Output: None, but creates a local JSON file containing translations
 def generate_file(language, token):
-    url = 'http://localhost:8000/api/translations'
+    if not language:
+        language = get_default_language()
+    url = globals.TRANSLATIONS_ENDPOINT
     params = {'language': language}
     headers = {'token': token}
     response = requests.get(url, params=params, headers=headers)
