@@ -1,3 +1,5 @@
+import json
+import os
 from src.internationalize.helpers import get_json
 
 
@@ -19,16 +21,27 @@ def get_translation(file_path, language, word):
 
 
 class Localize:
-    def __init__(self, languages_dir):
-        self.languages_dir = languages_dir
-        self.language_map = {}
+    self.languages_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "languages")
+
+    def __init__(self):
+        self.translations_map = {}
 
     @classmethod
-    def load_language(self):
-        """Load the translation file for a specific language if not already loaded."""
-        pass
+    def load_language(self, language):
+        """
+        Load the translation file for a specific language if not already loaded.
+        """
+        if language not in self.translations_map:
+            file_path = os.path.join(self.languages_dir, f"{language}.json")
+            if os.path.exists(file_path):
+                with open(file_path, "r") as file:
+                    self.translations_map[language] = json.load(file)
+            else:
+                raise FileNotFoundError(f"Translations for {language} not found.")
 
     @classmethod
     def translate(self):
-        """Get translation for a word in the specified language."""
+        """
+        Get translation for a word in the specified language.
+        """
         pass
