@@ -32,12 +32,16 @@ class TestGenerateFile(unittest.TestCase):
     
     @patch('src.internationalize.helpers.requests.get')
     def test_generate_file_error(self, mock_get):
+        # Mock the response object
         mock_response = Mock()
         mock_response.status_code = 404
+        mock_response.json.return_value = {'error': 'Language not found'}  # Proper dictionary
         mock_get.return_value = mock_response
 
+        # Call the function
         generate_file('french', self.TEST_TOKEN)
-        
+
+        # Check that the file does not exist
         expected_file_path = './src/internationalize/languages/french.json'
         self.assertFalse(os.path.exists(expected_file_path))
 
