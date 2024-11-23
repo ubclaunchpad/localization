@@ -25,4 +25,4 @@ class Localize:
         Get translation for a word in the specified language.
         """
         cls.load_language(language)
-        return cls.translations_map[language].get(word, "Translation not found")
+        return cls.translations_map[language].get(word, f"Translation for {word} not found")

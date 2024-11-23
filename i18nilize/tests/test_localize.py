@@ -5,7 +5,6 @@ from src.internationalize.localize import Localize
 # to test:
 # in i18nilize directory, run python -m tests.test_localize
 
-
 class TestLocalize(unittest.TestCase):
     def setUp(self):
         Localize.translations_map = {}
@@ -25,16 +24,16 @@ class TestLocalize(unittest.TestCase):
 
     def test_load_non_existing_language(self):
         with self.assertRaises(FileNotFoundError) as context:
-            Localize.load_language("german")
+            Localize.load_language("japanese")
 
-        self.assertEqual(str(context.exception), "Translations for german not found.")
+        self.assertEqual(str(context.exception), "Translations for japanese not found.")
 
     def test_translate_valid(self):
         self.assertEqual(Localize.translate("hello", "spanish"), "hola", "Translation error: is the translation missing from the language file?")
         self.assertEqual(Localize.translate("thanks", "french"), "merci", "Translation error: is the translation missing from the language file?")
 
     def test_translate_invalid(self):
-        self.assertEqual(Localize.translate("asdf", "spanish"), "Translation not found")
+        self.assertEqual(Localize.translate("asdf", "spanish"), "Translation for asdf not found")
 
     def test_translate_invalid_language(self):
         self.assertRaises(FileNotFoundError, Localize.translate, "hello", "asdf")
