@@ -1,0 +1,37 @@
+{
+    "italian": {
+        "type": "modified",
+        "created": {},
+        "modified": {
+            "thanks": "La ringrazio"
+        },
+        "deleted": {
+            "welcome": "benvenuto"
+        }
+    },
+    "spanish": {
+        "type": "modified",
+        "created": {
+            "welcome": "bienvenido"
+        },
+        "modified": {
+            "hello": "holi"
+        },
+        "deleted": {}
+    },
+    "french": {
+        "type": "deleted",
+        "created": {},
+        "modified": {},
+        "deleted": {}
+    },
+    "mandarin": {
+        "type": "created",
+        "created": {
+            "hello": "ni hao",
+            "welcome": "huan yin"
+        },
+        "modified": {},
+        "deleted": {}
+    }
+}

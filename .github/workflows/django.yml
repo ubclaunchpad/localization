@@ -38,6 +38,4 @@ jobs:
     - name: Run PIP Tests
       run: |
         cd i18nilize
-        python3 -m tests.test_read_file
-        python3 -m tests.test_parse_json
-        python3 -m tests.test_api_helpers
+        python -m unittest discover tests

@@ -9,4 +9,6 @@ API_BASE_URL = "http://localhost:8000/api/"
 TOKEN_ENDPOINT = f"{API_BASE_URL}token/"
 TRANSLATIONS_ENDPOINT = f"{API_BASE_URL}translations/"
 
+LANGUAGES_DIR = 'src/internationalize/languages'
+
 token = GlobalToken()

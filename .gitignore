@@ -2,3 +2,4 @@ env/
 **/__pycache__
 myenv
 venv
+i18nilize.egg-info

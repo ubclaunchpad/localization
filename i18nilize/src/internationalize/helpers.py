@@ -1,9 +1,8 @@
 import json
+import sys
 import os
+import hashlib
 import requests
-from geocoder import ip
-from geopy.geocoders import Nominatim
-from babel.languages import get_official_languages
 from . import globals
 
 # Function to parse json file, given its path
@@ -22,6 +21,57 @@ def get_json(file_path):
         print(f"Error: {e}")
         raise e
     return data
+
+# Adds a json file corresponding to the added language
+def add_language(language):
+    os.makedirs(globals.LANGUAGES_DIR, exist_ok=True)
+    file_path = os.path.join(globals.LANGUAGES_DIR, f"{language.lower()}.json")
+
+    if os.path.exists(file_path):
+        return
+    
+    initial_content = {}
+    with open(file_path, 'w') as file:
+        json.dump(initial_content, file, indent=4)
+    print(f"Language added.")
+
+# Adds/updates a translated word under the given language in the default JSON file
+def add_update_translated_word(language, original_word, translated_word):
+    file_path = os.path.join(globals.LANGUAGES_DIR, f"{language.lower()}.json")
+
+    if not os.path.exists(file_path):
+        print(f"Error: Language '{language}' does not exist. Add the language before adding a translation.")
+        sys.exit(1)
+    
+    data = get_json(file_path)
+
+    data[original_word] = translated_word
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+    print(f"{original_word}: {translated_word} added to translations.")
+
+# Deletes a translated word for the given language
+def delete_translation(language, original_word, translated_word):
+    file_path = os.path.join(globals.LANGUAGES_DIR, f"{language.lower()}.json")
+
+    if not os.path.exists(file_path):
+        print(f"Error: Language '{language}' does not exist.")
+        sys.exit(1)
+
+    data = get_json(file_path)
+
+    if original_word not in data:
+        print(f"Error: Original word '{original_word}' does not exist in language '{language}'.")
+        sys.exit(1)
+
+    if data[original_word] != translated_word:
+        print(f"Error: Translated word for '{original_word}' does not match '{translated_word}'.")
+        sys.exit(1)
+
+    del data[original_word]
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+    print(f"Translation for '{original_word}' deleted successfully from language '{language}'.")
 
 # Input: 
 #   - file_path: path of json file
@@ -71,7 +121,7 @@ def generate_file(language, token):
         return
     
     file_content = response.json() 
-    
+
     # transforms the dictionary object above into a JSON object
     json_object = json.dumps(file_content, indent=4)
     create_json(json_object, language)
@@ -89,3 +139,46 @@ def make_translation_map(data):
 def get_translation(translations_map, language):
     return translations_map.get(language, "Translation not found")
 
+"""
+Computes 256-bit hash for given content
+"""
+def compute_hash(file_content):
+    hash = hashlib.sha256()
+    hash.update(file_content)
+    return hash.hexdigest()
+
+"""
+Computes hashes for all files in a directory
+"""
+def compute_hashes(directory):
+    hash_dict = {}
+    files = os.listdir(directory)
+    for file_name in files:
+        path = directory + "/" + file_name
+        
+        # Read file as byte buffer for hashing
+        with open(path, "rb") as file:
+            file_name_no_ext = file_name.split(".")[0]
+            file_content = file.read()
+            file_hash = compute_hash(file_content)
+            hash_dict[file_name_no_ext] = file_hash
+
+    return hash_dict
+
+"""
+Reads a file given the directory and returns json object
+Expects file to be in json format
+"""
+def read_json_file(directory):
+    try:
+        with open(directory, "r") as file:
+            json_object = json.load(file)
+            return json_object
+    except FileNotFoundError:
+        print(f"File not found: {directory}")
+        raise
+    except IOError:
+        print(f"An error occurred while trying to read the file: {directory}")
+        raise
+    except Exception as e:
+        print(f"An exception occured: {e}") 
