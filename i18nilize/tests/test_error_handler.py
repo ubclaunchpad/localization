@@ -16,7 +16,7 @@ class TestErrorHandler(unittest.TestCase):
             123: "bonjour",
             None: "merci"
         }
-        self.assertEqual(handler.handle_invalid_keys(language), "Key '123' is not a string.")
+        self.assertEqual(handler.handle_invalid_keys(language), "Key is not a string.")
 
     def test_empty_or_whitespace_keys(self):
         handler = ErrorHandler({})
@@ -24,16 +24,16 @@ class TestErrorHandler(unittest.TestCase):
             "": "bonjour",
             "   ": "merci"
         }
-        self.assertEqual(handler.handle_invalid_keys(language), "Key is empty or only contains whitespace.")
+        self.assertEqual(handler.handle_invalid_keys(language), "Key is empty.")
 
     def test_combined_issues(self):
-        handler = TranslationHandler({})
+        handler = ErrorHandler({})
         language = {
             123: "bonjour",
             "   ": "merci",
             "hello-world": "salut"
         }
-        self.assertEqual(handler.handle_invalid_keys(language), "Key '123' is not a string.")
+        self.assertEqual(handler.handle_invalid_keys(language), "Key is not a string.")
 
 if __name__ == "__main__":
     unittest.main()
