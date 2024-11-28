@@ -67,4 +67,9 @@ class ErrorHandler():
         - A descriptive message about the invalid key(s)
     """
     def handle_invalid_keys(self, language):
+        for key in language.keys():
+            if not isinstance(key,str):
+                return "Key is not a string."
+            if not key.strip():
+                return "Key is empty."
         return ""
