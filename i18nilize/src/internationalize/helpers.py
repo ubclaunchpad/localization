@@ -73,6 +73,28 @@ def delete_translation(language, original_word, translated_word):
         json.dump(data, file, indent=4)
     print(f"Translation for '{original_word}' deleted successfully from language '{language}'.")
 
+"""
+Pulls all translations assigned to the microservices' token
+and overwrites all language files to sync translations.
+"""
+def pull_translations():
+    token = globals.token.value
+
+    try:
+        all_translations = requests.get(globals.PULL_TRANSLATIONS_ENDPOINT, headers={'Token': token})
+    except Exception as e:
+        print("Error: Could not fetch translations from database.", e)
+
+    # Overwrite all translation files
+    all_transactions_dict = all_translations.json()
+    for language, translations in all_transactions_dict.items():
+        file_name = f"{language}_2.json"
+        curr_file_path = os.path.join(globals.LANGUAGES_DIR, file_name)
+        with open(curr_file_path, "w+") as file:
+            json.dump(translations, file, indent=4)
+
+    print(f"Pulled all translations from the database.")
+
 # Input: 
 #   - file_path: path of json file
 # Output: Token in json file
@@ -85,7 +107,7 @@ def get_token(file_path):
 # Input: a JSON object
 # Output: None, but creates a local JSON file containing the object
 def create_json(json_object, language):
-    base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+    base_dir = os.path.join(oparamss.path.dirname(os.path.abspath(__file__)))
     file_path = os.path.join(base_dir, 'languages', f'{language}.json')
     with open(file_path, 'w') as outfile:
         outfile.write(json_object)

@@ -30,6 +30,9 @@ def cli():
     delete_parser.add_argument('original_word')
     delete_parser.add_argument('translated_word')
 
+    # sub parser for pull
+    pull_parser = subparsers.add_parser('pull')
+
     # the subparser is used because different CLIs use a different amount of inputs
 
     args = parser.parse_args()
@@ -41,6 +44,8 @@ def cli():
         add_update_translated_word(args.language, args.original_word, args.translated_word)
     elif args.command == 'delete':
         delete_translation(args.language, args.original_word, args.translated_word)
+    elif args.command == 'pull':
+        pull_translations()
     else:
         print("Invalid command")
 
