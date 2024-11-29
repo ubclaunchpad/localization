@@ -88,7 +88,7 @@ def pull_translations():
     # Overwrite all translation files
     all_transactions_dict = all_translations.json()
     for language, translations in all_transactions_dict.items():
-        file_name = f"{language}_2.json"
+        file_name = f"{language}.json"
         curr_file_path = os.path.join(globals.LANGUAGES_DIR, file_name)
         with open(curr_file_path, "w+") as file:
             json.dump(translations, file, indent=4)
