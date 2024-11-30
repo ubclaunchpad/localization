@@ -1011,3 +1011,31 @@ class TranslationViewTests(APITestCase):
             response = self.client.get(reverse('translation'), query_params=query_params_get[i], headers=headers)
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
             self.assertEqual(response.data['error'], 'Translation not found for given language and word!')
+
+class PullTranslations(APITestCase):
+
+    def setUp(self):
+        token = Token.objects.create()
+        self.TEST_TOKEN = str(token.value)
+   
+    def test_pulling_no_assigned_translations(self):
+        pass
+
+    def test_pulling_multiple_assigned_translations(self):
+        headers = {
+            'Token': self.TEST_TOKEN
+        }
+        query_params = {
+            'language': 'spanish',
+            'hello': 'hola'
+        }
+        expected_response = {
+            'spanish': {
+                'hello': 'hola'
+            }
+        }
+        self.client.post(reverse('translation'), query_params=query_params, headers=headers, format='json')
+
+        response = self.client.get(reverse('pull-translations'), headers=headers, format='json')
+        response_data = response.json()
+        self.assertEqual(response_data, expected_response)
