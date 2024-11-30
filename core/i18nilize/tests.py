@@ -1018,23 +1018,34 @@ class PullTranslations(APITestCase):
         token = Token.objects.create()
         self.TEST_TOKEN = str(token.value)
    
-    def test_pulling_no_assigned_translations(self):
-        pass
-
     def test_pulling_multiple_assigned_translations(self):
         headers = {
             'Token': self.TEST_TOKEN
         }
-        query_params = {
-            'language': 'spanish',
-            'hello': 'hola'
+        translations_data = {
+            'translations': [
+                {
+                    'language': 'spanish',
+                    'hello': 'hola',
+                    'bye': 'chau',
+                },
+                {
+                    'language': 'french',
+                    'hello': 'bonjour',
+                }
+            ]
         }
         expected_response = {
             'spanish': {
-                'hello': 'hola'
+                'hello': 'hola',
+                'bye': 'chau',
+            },
+            'french': {
+                'hello': 'bonjour',
             }
         }
-        self.client.post(reverse('translation'), query_params=query_params, headers=headers, format='json')
+
+        self.client.post(reverse('process-translations'), translations_data, headers=headers, format='json')
 
         response = self.client.get(reverse('pull-translations'), headers=headers, format='json')
         response_data = response.json()
