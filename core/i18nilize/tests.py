@@ -1045,7 +1045,7 @@ class PullTranslations(APITestCase):
             }
         }
 
-        self.client.post(reverse('process-translations'), translations_data, headers=headers, format='json')
+        self.client.post(reverse('process-translations'), data=translations_data, headers=headers, format='json')
 
         response = self.client.get(reverse('pull-translations'), headers=headers, format='json')
         response_data = response.json()
