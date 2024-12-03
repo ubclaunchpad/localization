@@ -1,0 +1,6 @@
+{
+    "combined_issues.json": "Value is not a string.",
+    "empty_keys.json": "Key is empty.",
+    "invalid_file.json": "Invalid Language File, try fixing the json format.",
+    "non_string_values.json": "Value is not a string."
+}
