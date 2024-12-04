@@ -37,20 +37,17 @@ class ErrorHandler():
     Output: descriptive string about the error from the language file
     """
     def handle_error(self, language_file, error_expected=False):
-        result = ""
-
+        invalid_file_result = ""
         # Verify if file is invalid
-        result = self.handle_invalid_file(language_file)
-        if result != "":
-            return result
-
+        invalid_file_result = self.handle_invalid_file(language_file)
+        print(invalid_file_result)
+        if invalid_file_result != "":
+            return invalid_file_result
         # Verify if any keys are invalid
-        result = self.handle_invalid_keys(language_file)
-
-        if result == "" and error_expected:
-            raise Exception(f"expected error in {language_file} but no error was found")
-        
-        return result
+        invalid_keys_result = self.handle_invalid_keys(language_file)
+        if invalid_keys_result != "":
+            return invalid_keys_result     
+        return ""
 
     """
     Checks if given language is in an invalid file
@@ -82,12 +79,13 @@ class ErrorHandler():
         language = {}
         try:
             with open(language_location, "r") as file:
-                language = json.load(file)
+                language = json.load(file)   
             for key in language:
+                stripped_key = key.strip()     
+                if stripped_key == "":
+                    return "Key is empty or contains only whitespace."
                 if not isinstance(language[key], str):
-                    return "Value is not a string."
-                if not key.strip():
-                    return "Key is empty."
+                    return f"Value for key '{key}' is not a string."
         except Exception as e:
             print(f"Unexpected Error: {e}")
             raise e
