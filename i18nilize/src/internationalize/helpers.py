@@ -77,7 +77,7 @@ def delete_translation(language, original_word, translated_word):
 Pulls all translations assigned to the microservices' token
 and overwrites all language files to sync translations.
 """
-def pull_translations():
+def pull_translations(write_directory=globals.LANGUAGES_DIR):
     token = globals.token.value
 
     try:
@@ -89,7 +89,7 @@ def pull_translations():
     all_transactions_dict = all_translations.json()
     for language, translations in all_transactions_dict.items():
         file_name = f"{language}.json"
-        curr_file_path = os.path.join(globals.LANGUAGES_DIR, file_name)
+        curr_file_path = os.path.join(write_directory, file_name)
         with open(curr_file_path, "w+") as file:
             json.dump(translations, file, indent=4)
 
