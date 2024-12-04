@@ -1,6 +1,7 @@
-import unittest, os, json, timeit
+import unittest, os, json, timeit, shutil
 from unittest.mock import patch
-from src.internationalize.helpers import delete_translation, get_json, make_translation_map, get_translation, add_language, add_update_translated_word
+from src.internationalize.helpers import delete_translation, get_json, make_translation_map, get_translation, add_language, add_update_translated_word, pull_translations
+from src.internationalize import globals
 
 # Create your tests here.            
 # To test:
@@ -76,14 +77,14 @@ class TestCLI(unittest.TestCase):
         language = "German"
         add_language(language)
         file_path = os.path.join(self.languages_dir, f"{language.lower()}.json")
-        
+
         initial_translations = {
             "goodbye": "auf Wiedersehen",
             "thank you": "danke"
         }
         with open(file_path, "w") as file:
             json.dump(initial_translations, file, indent=4)
-        
+
         data = get_json(file_path)
         self.assertIn("goodbye", data)
         self.assertEqual(data["goodbye"], "auf Wiedersehen")
@@ -111,13 +112,13 @@ class TestCLI(unittest.TestCase):
         language = "Chinese"
         add_language(language)
         file_path = os.path.join(self.languages_dir, f"{language.lower()}.json")
-        
+
         initial_translations = {
             "thank you": "谢谢"
         }
         with open(file_path, "w") as file:
             json.dump(initial_translations, file, indent=4)
-        
+
         data = get_json(file_path)
         self.assertIn("thank you", data)
         self.assertNotIn("good morning", data)
@@ -136,13 +137,13 @@ class TestCLI(unittest.TestCase):
         language = "Korean"
         add_language(language)
         file_path = os.path.join(self.languages_dir, f"{language.lower()}.json")
-        
+
         initial_translations = {
             "welcome": "환영합니다"
         }
         with open(file_path, "w") as file:
             json.dump(initial_translations, file, indent=4)
-        
+
         data = get_json(file_path)
         self.assertIn("welcome", data)
         self.assertEqual(data["welcome"], "환영합니다")
@@ -156,6 +157,48 @@ class TestCLI(unittest.TestCase):
         data = get_json(file_path)
         self.assertIn("welcome", data)
         self.assertEqual(data["welcome"], "환영합니다")
+
+    def test_pull_translations(self):
+        prev_token = globals.token.value
+        test_token = "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
+        globals.token.value = test_token
+
+        # Create temporary directories to pull translations
+        temp_dir_path = os.path.join(self.languages_dir, "temp")
+        files_to_copy = ["spanish.json", "french.json"]
+        if not os.path.exists(temp_dir_path):
+            os.mkdir(temp_dir_path)
+        for file_name in files_to_copy:
+            curr_file_path = os.path.join(self.languages_dir, file_name)
+            new_file_path = os.path.join(temp_dir_path, file_name)
+            shutil.copy(curr_file_path, new_file_path)
+
+        # Expected content after pulling from API
+        expected_file_content = {
+            "fr.json": {
+                "hello": "bonjour"
+            },
+            "french.json": {
+                "hello": "bonjour"
+            },
+            "spanish.json": {
+                "hello": "hola",
+                "bye": "chau",
+                "what": "que",
+                "como": "how",
+                "codigo": "code"
+            }
+        }
+
+        pull_translations(write_directory=temp_dir_path)
+        for file_name in os.listdir(temp_dir_path):
+            file_path = os.path.join(temp_dir_path, file_name)
+            file_content = get_json(file_path)
+            self.assertEqual(file_content, expected_file_content[file_name])
+
+        # Cleanup
+        shutil.rmtree(temp_dir_path)
+        globals.token.value = prev_token
 
 if __name__ == '__main__':
     unittest.main()
