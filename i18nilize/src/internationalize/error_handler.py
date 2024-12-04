@@ -40,7 +40,7 @@ class ErrorHandler():
         invalid_file_result = ""
         # Verify if file is invalid
         invalid_file_result = self.handle_invalid_file(language_file)
-        print(invalid_file_result)
+        # print(invalid_file_result)
         if invalid_file_result != "":
             return invalid_file_result
         # Verify if any keys are invalid
@@ -85,7 +85,7 @@ class ErrorHandler():
                 if stripped_key == "":
                     return "Key is empty or contains only whitespace."
                 if not isinstance(language[key], str):
-                    return f"Value for key '{key}' is not a string."
+                    return f"Value is not a string."
         except Exception as e:
             print(f"Unexpected Error: {e}")
             raise e

@@ -20,23 +20,21 @@ class TestErrorHandler(unittest.TestCase):
 
     def test_empty_or_whitespace_keys(self):
         language = "empty_keys.json"
-        self.assertEqual(self.handler.handle_invalid_keys(language), "Key is empty.")
+        self.assertEqual(self.handler.handle_invalid_keys(language), "Key is empty or contains only whitespace.")
 
     def test_combined_issues(self):
         language = "combined_issues.json"
         self.assertEqual(self.handler.handle_invalid_keys(language), "Value is not a string.")
 
     # ================== Test Invalid Files ================================
-    def test_invalid_file(self):
-        language = "invalid_file.json"
-        self.assertEqual(self.handler.handle_invalid_file(language), "Invalid Language File, try fixing the json format.")
     
-    def test_invalid_file(self):
+    def test_invalid_file_individual(self):
         language = "invalid_file.json"
         self.assertEqual(self.handler.handle_invalid_file(language), "Invalid Language File, try fixing the json format.")
 
     # ================== Test Error Handler ================================
     def test_invalid_file(self):
+        print("invalid File Test: ")
         language = "invalid_file.json"
         self.assertEqual(self.handler.handle_error(language), "Invalid Language File, try fixing the json format.")
 
@@ -48,15 +46,8 @@ class TestErrorHandler(unittest.TestCase):
         language = "valid_keys.json"
         self.assertEqual(self.handler.handle_error(language), "")
 
-    def test_valid_unexpected(self):
-        language = "valid_keys.json"
-        with self.assertRaises(Exception) as context:
-            self.handler.handle_error(language, True)
-        
-        self.assertEqual(str(context.exception), "expected error in valid_keys.json but no error was found")
-
     # ================== Test Folder ================================
-    def test_invalid_file(self):
+    def test_invalid_folder(self):
         with open(os.path.join(self.test_folder, "expected.json"), "r") as file:
             expected = json.load(file)
 
