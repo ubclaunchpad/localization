@@ -1,7 +1,7 @@
 #from src.internationalize.helpers import add_language
 import json
 import argparse
-from i18nilize.src.internationalize.helpers import add_language, add_update_translated_word, delete_translation
+from i18nilize.src.internationalize.helpers import add_language, add_update_translated_word, delete_translation, pull_translations, push_translations
 
 def cli():
     # initialize the parser
@@ -33,6 +33,9 @@ def cli():
     # sub parser for pull
     pull_parser = subparsers.add_parser('pull')
 
+    # sub parser for push
+    push_parser = subparsers.add_parser('push')
+
     # the subparser is used because different CLIs use a different amount of inputs
 
     args = parser.parse_args()
@@ -46,6 +49,8 @@ def cli():
         delete_translation(args.language, args.original_word, args.translated_word)
     elif args.command == 'pull':
         pull_translations()
+    elif args.command == 'push':
+        push_translations()
     else:
         print("Invalid command")
 

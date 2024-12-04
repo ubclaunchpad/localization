@@ -7,4 +7,5 @@ urlpatterns = [
     path('translation', TranslationView.as_view(), name='translation'),
     path('translations', ProcessTranslationsView.as_view(), name='process-translations'),
     path('translations/pull/', PullTranslations.as_view(), name='pull-translations'),
+    path('translations/push/', TranslationView.as_view(), name='push-translations'),
 ]

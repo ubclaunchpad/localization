@@ -4,6 +4,7 @@ import os
 import hashlib
 import requests
 from . import globals
+from diffing_processor import get_changed_translations
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -94,6 +95,44 @@ def pull_translations():
             json.dump(translations, file, indent=4)
 
     print(f"Pulled all translations from the database.")
+
+"""
+Push all local translations to the API.
+"""
+def push_translations():
+    token = globals.token.value
+    changed_translations = get_changed_translations()
+
+    for language in changed_translations:
+        created = changed_translations[language]["created"]
+        modified = changed_translations[language]["modified"]
+        deleted = changed_translations[language]["deleted"]
+
+        # Post a new entry for each new translation
+        for original_word in created:
+            try:
+                response = requests.post(globals.PUSH_TRANSLATIONS_ENDPOINT, headers={'Token': token}, 
+                                         params={'language': language, original_word: created[original_word]})
+            except Exception as e:
+                print("Error: Could not create translation.", e)
+        
+        # Patch the appropriate entry for each modified translation
+        for original_word in modified:
+            try:
+                response = requests.patch(globals.PUSH_TRANSLATIONS_ENDPOINT, headers={'Token': token}, 
+                                         params={'language': language, original_word: modified[original_word]})
+            except Exception as e:
+                print("Error: Could not patch translation.", e)
+
+        # Delete the appropriate entry for each deleted translation
+        for original_word in deleted:
+            try:
+                response = requests.delete(globals.PUSH_TRANSLATIONS_ENDPOINT, headers={'Token': token}, 
+                                         params={'language': language, original_word: deleted[original_word]})
+            except Exception as e:
+                print("Error: Could not delete translation.", e)
+
+    print(f"Pushed all translations from the database.")
 
 # Input: 
 #   - file_path: path of json file
