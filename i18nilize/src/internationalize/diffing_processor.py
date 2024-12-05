@@ -48,7 +48,9 @@ class DiffingProcessor():
     """
     Updates translation files with new changes and updates hashes in metadata.
     """
-    def update_to_current_state(self, hash_dict):
+    def update_to_current_state(self, hash_dict=None):
+        if hash_dict == None:
+            hash_dict = compute_hashes(self.curr_translation_files_dir)
         self.update_metadata(hash_dict)
         self.sync_translations()
 
