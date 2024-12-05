@@ -43,6 +43,21 @@ class TokenView(APIView):
         except Token.DoesNotExist:
             return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+class TestTokenView(APIView):
+    """
+    Endpoint to delete all translations tied to a token for testing.
+    """
+    @require_valid_token
+    def delete(self, request):
+        token = request.token
+        try:
+            translations = Translation.objects.filter(token=token)
+            for t in translations:
+                t.delete()
+        except Exception as e:
+            print(e)
+            return Response({'error': 'Could not delete all translations for given token.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message': 'Deleted all translations tied to given token.'}, status=status.HTTP_200_OK)
 
 class ProcessTranslationsView(APIView):
     """

@@ -63,4 +63,5 @@ def push_translations(translations_dir=globals.LANGUAGES_DIR):
             except Exception as e:
                 print("Error: Could not delete translation.", e)
 
+    diff_processor.update_to_current_state()
     print(f"Pushed all translations from the database.")
