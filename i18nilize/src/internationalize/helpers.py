@@ -4,6 +4,7 @@ import os
 import hashlib
 import requests
 from . import globals
+from src.internationalize.diffing_processor import DiffingProcessor
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -182,3 +183,10 @@ def read_json_file(directory):
         raise
     except Exception as e:
         print(f"An exception occured: {e}") 
+
+"""
+Initializes translations directory for diffing
+"""
+def setup_diffing():
+    dp = DiffingProcessor(globals.TEST_LANGUAGES_DIR)
+    dp.setup()

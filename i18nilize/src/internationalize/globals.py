@@ -15,4 +15,7 @@ PUSH_TRANSLATIONS_ENDPOINT = f"{TRANSLATIONS_ENDPOINT}push/"
 
 LANGUAGES_DIR = 'src/internationalize/languages'
 
+# Use this directory to test the cli
+TEST_LANGUAGES_DIR = 'temp'
+
 token = GlobalToken()
