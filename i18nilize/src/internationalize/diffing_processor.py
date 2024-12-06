@@ -1,6 +1,7 @@
 import os
 import hashlib
 import json
+import logging
 from dirsync import sync
 from src.internationalize.helpers import compute_hash, compute_hashes, read_json_file
 
@@ -16,6 +17,7 @@ Diffing Processor Class
 """
 class DiffingProcessor():
     def __init__(self, curr_translations_dir):
+        logging.getLogger('dirsync').disabled = True
         self.diff_state_root_dir = "diff_state"
         self.diff_state_files_dir = os.path.join(self.diff_state_root_dir, "translations")
         self.metadata_file_dir = os.path.join(self.diff_state_root_dir, "metadata.json")
