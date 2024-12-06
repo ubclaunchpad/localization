@@ -4,6 +4,7 @@ import argparse
 from i18nilize.src.internationalize.helpers import add_language, add_update_translated_word, delete_translation
 from i18nilize.src.internationalize.sync_processor import pull_translations, push_translations
 from i18nilize.src.internationalize.diffing_processor import DiffingProcessor
+from i18nilize.src.internationalize import globals
 
 def cli():
     # initialize the parser
@@ -58,7 +59,7 @@ def cli():
         push_translations()
     elif args.command == 'setup':
         # Quick fix for now
-        dp = DiffingProcessor("/temp")
+        dp = DiffingProcessor(globals.LANGUAGES_DIR)
         dp.setup()
     else:
         print("Invalid command")
