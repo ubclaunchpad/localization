@@ -26,8 +26,10 @@ class DiffingProcessor():
     """
     def setup(self):
         try:
-            os.mkdir(self.diff_state_root_dir)
-            os.mkdir(self.diff_state_files_dir)
+            if not os.path.exists(self.diff_state_root_dir):
+                os.mkdir(self.diff_state_root_dir)
+            if not os.path.exists(self.diff_state_files_dir):
+                os.mkdir(self.diff_state_files_dir)
             with open(self.metadata_file_dir, "w") as outfile:
                 json.dump({}, outfile)
 
