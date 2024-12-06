@@ -1,7 +1,8 @@
 #from src.internationalize.helpers import add_language
 import json
 import argparse
-from i18nilize.src.internationalize.helpers import add_language, add_update_translated_word, delete_translation, pull_translations, push_translations
+from i18nilize.src.internationalize.helpers import add_language, add_update_translated_word, delete_translation
+from i18nilize.src.internationalize.sync_processor import pull_translations, push_translations
 from i18nilize.src.internationalize.diffing_processor import DiffingProcessor
 
 def cli():
