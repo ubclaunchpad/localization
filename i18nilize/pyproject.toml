@@ -1,3 +1,38 @@
 [build-system]
-requires = ['setuptools>=42']
-build-backend = 'setuptools.build_meta'
+requires = ["setuptools >= 42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "localization"
+version = "1.0.0"
+authors = [
+    { name = "UBC Launchpad", email = "strategy@ubclaunchpad.com" }
+]
+description = "A localization package for microservices"
+readme = "readme.md"
+license = { file = "LICENSE.txt" }
+keywords = ["localization", "microservices"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "requests>=2.25.1",
+    "geocoder>=1.38.1",
+    "geopy>=2.2.0",
+    "Babel>=2.9.1",
+    "dirsync>=2.2.5",
+]
+
+[project.scripts]
+i18nilize = "src.internationalize.command_line:cli"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.setuptools.package-dir]
+src = "src"
+
+# [tool.setuptools.packages.find]
+# where = ["src"]
