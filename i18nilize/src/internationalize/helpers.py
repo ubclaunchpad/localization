@@ -9,7 +9,7 @@ from . import globals
 def get_json(file_path):
     try:
     # open file and parse
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf8') as file:
             data = json.load(file)
     except FileNotFoundError:
         print("File not found")

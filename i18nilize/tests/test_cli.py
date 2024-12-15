@@ -162,9 +162,13 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(data["welcome"], "환영합니다")
 
     def test_pull_translations(self):
+        # Set global token to test token (Note: test will fail if translations
+        # tied token are modified) 
         prev_token = globals.token.value
         test_token = "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
         globals.token.value = test_token
+
+        # Initialize DiffingProcessor with test directory
         temp_dir_path = os.path.join(self.languages_dir, "temp")
         diff_processor = DiffingProcessor(temp_dir_path)
         if os.path.exists(diff_processor.diff_state_root_dir):
@@ -172,12 +176,12 @@ class TestCLI(unittest.TestCase):
         diff_processor.setup()
 
         # Create temporary directories to pull translations
-        files_to_copy = ["spanish.json", "french.json"]
         if os.path.exists(temp_dir_path):
             shutil.rmtree(temp_dir_path)
         os.mkdir(temp_dir_path)
         
-        # Copy files into temp dir to test overwriting
+        # Copy test files into temp dir to test overwriting
+        files_to_copy = ["spanish.json", "french.json"]
         for file_name in files_to_copy:
             curr_file_path = os.path.join(self.languages_dir, file_name)
             new_file_path = os.path.join(temp_dir_path, file_name)
@@ -212,12 +216,16 @@ class TestCLI(unittest.TestCase):
         globals.token.value = prev_token
 
     def test_push_translations(self):
+        # Set global token to test token
         prev_token = globals.token.value
         test_token = "a373fc5e-5b65-463e-b89e-1a37706a69dd"
         globals.token.value = test_token
+
+        # Initialize DiffingProcessor with test directory
         temp_dir_path = os.path.join(self.languages_dir, "temp")
         diff_processor = DiffingProcessor(temp_dir_path)
 
+        # Remove any persisting test data from previous tests (in case of a test failure)
         if os.path.exists(diff_processor.diff_state_root_dir):
             shutil.rmtree(diff_processor.diff_state_root_dir)
         if os.path.exists(temp_dir_path):
