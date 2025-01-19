@@ -3,7 +3,9 @@ import hashlib
 import json
 import logging
 from dirsync import sync
+from . import globals
 from src.internationalize.helpers import compute_hash, compute_hashes, read_json_file
+from src.internationalize.error_handler import ErrorHandler
 
 JSON_EXTENSION = ".json"
 
@@ -63,6 +65,13 @@ class DiffingProcessor():
             json.dump(hash_dict, outfile)
 
     def sync_translations(self):
+        handler = ErrorHandler(globals.LANGUAGES_DIR)
+        errors = handler.verify_languages()
+        if errors:
+            print("Errors detected in language files:")
+            for file, error in errors.items():
+                print(f"{file}: {error}")
+            return
         sync(self.curr_translation_files_dir, self.diff_state_files_dir, "sync", purge=True)
 
     """

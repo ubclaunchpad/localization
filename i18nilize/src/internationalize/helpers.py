@@ -4,6 +4,7 @@ import os
 import hashlib
 import requests
 from . import globals
+from internationalize.error_handler import ErrorHandler
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -38,13 +39,30 @@ def add_language(language):
 # Adds/updates a translated word under the given language in the default JSON file
 def add_update_translated_word(language, original_word, translated_word):
     file_path = os.path.join(globals.LANGUAGES_DIR, f"{language.lower()}.json")
-
+    handler = ErrorHandler(globals.LANGUAGES_DIR)
+    
     if not os.path.exists(file_path):
         print(f"Error: Language '{language}' does not exist. Add the language before adding a translation.")
         sys.exit(1)
+    if not original_word.strip():
+        print("Error: Original word cannot be empty or contain only whitespace.")
+        sys.exit(1)
+    if not translated_word.strip():
+        print("Error: Translated word cannot be empty or contain only whitespace.")
+        sys.exit(1)
+    try:
+        data = get_json(file_path)
+    except json.JSONDecodeError as e:
+        result = handler.handle_error(f"{language.lower()}.json", True)
+        sys.exit(1)
     
-    data = get_json(file_path)
-
+    result = handler.handle_error(f"{language.lower()}.json", True)
+    if (result == "Key is empty or contains only whitespace."):
+        print(result)
+        sys.exit(1)
+    elif (result != ""):
+        print(result)
+        sys.exit(1)
     data[original_word] = translated_word
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
@@ -53,12 +71,31 @@ def add_update_translated_word(language, original_word, translated_word):
 # Deletes a translated word for the given language
 def delete_translation(language, original_word, translated_word):
     file_path = os.path.join(globals.LANGUAGES_DIR, f"{language.lower()}.json")
-
+    handler = ErrorHandler(globals.LANGUAGES_DIR)
     if not os.path.exists(file_path):
         print(f"Error: Language '{language}' does not exist.")
         sys.exit(1)
+    try:
+        data = get_json(file_path)
+    except json.JSONDecodeError as e:
+        result = handler.handle_error(f"{language.lower()}.json", True)
+        sys.exit(1)
+    
+    result = handler.handle_error(f"{language.lower()}.json", True)
+    if (result == "Key is empty or contains only whitespace."):
+        print(result)
+        sys.exit(1)
+    elif (result != ""):
+        print(result)
+        sys.exit(1)
 
-    data = get_json(file_path)
+    if not original_word.strip():
+        print("Error: Original word cannot be empty or contain only whitespace.")
+        sys.exit(1)
+
+    if not translated_word.strip():
+        print("Error: Translated word cannot be empty or contain only whitespace.")
+        sys.exit(1)
 
     if original_word not in data:
         print(f"Error: Original word '{original_word}' does not exist in language '{language}'.")
