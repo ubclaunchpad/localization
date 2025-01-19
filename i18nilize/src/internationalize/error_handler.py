@@ -24,6 +24,10 @@ class ErrorHandler():
         all_language_files = os.listdir(self.translations_dir)
 
         for language_file in all_language_files:
+            absolute_file_path = os.path.join(self.translations_dir, language_file)
+            if os.path.isdir(absolute_file_path):
+                continue
+
             error = self.handle_error(language_file)
             if error != "":
                 errors[language_file] = error
