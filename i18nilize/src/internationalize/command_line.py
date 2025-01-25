@@ -1,7 +1,10 @@
 #from src.internationalize.helpers import add_language
 import json
 import argparse
-from i18nilize.src.internationalize.helpers import add_language, add_update_translated_word, delete_translation
+from src.internationalize.helpers import add_language, add_update_translated_word, delete_translation
+from src.internationalize.sync_processor import pull_translations, push_translations
+from src.internationalize.diffing_processor import DiffingProcessor
+from src.internationalize import globals
 
 def cli():
     # initialize the parser
@@ -30,6 +33,15 @@ def cli():
     delete_parser.add_argument('original_word')
     delete_parser.add_argument('translated_word')
 
+    # sub parser for pull
+    pull_parser = subparsers.add_parser('pull')
+
+    # sub parser for push
+    push_parser = subparsers.add_parser('push')
+
+    # sub parser for setup
+    setup_parser = subparsers.add_parser('setup')
+
     # the subparser is used because different CLIs use a different amount of inputs
 
     args = parser.parse_args()
@@ -41,7 +53,16 @@ def cli():
         add_update_translated_word(args.language, args.original_word, args.translated_word)
     elif args.command == 'delete':
         delete_translation(args.language, args.original_word, args.translated_word)
+    elif args.command == 'pull':
+        pull_translations()
+    elif args.command == 'push':
+        push_translations()
+    elif args.command == 'setup':
+        # Quick fix for now
+        dp = DiffingProcessor(globals.LANGUAGES_DIR)
+        dp.setup()
     else:
         print("Invalid command")
 
-cli()
+if __name__ == "__main__":
+    cli()

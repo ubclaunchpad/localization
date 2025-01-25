@@ -1,7 +1,7 @@
 # api_helpers.py
 
 import requests
-from . import globals  
+from . import globals
 import sys
 
 def create_token():

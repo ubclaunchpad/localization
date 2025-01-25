@@ -4,13 +4,13 @@ import os
 import hashlib
 import requests
 from . import globals
-from internationalize.error_handler import ErrorHandler
+from src.internationalize.error_handler import ErrorHandler
 
 # Function to parse json file, given its path
 def get_json(file_path):
     try:
     # open file and parse
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf8') as file:
             data = json.load(file)
     except FileNotFoundError:
         print("File not found")

@@ -43,6 +43,21 @@ class TokenView(APIView):
         except Token.DoesNotExist:
             return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+class TestTokenView(APIView):
+    """
+    Endpoint to delete all translations tied to a token for testing.
+    """
+    @require_valid_token
+    def delete(self, request):
+        token = request.token
+        try:
+            translations = Translation.objects.filter(token=token)
+            for t in translations:
+                t.delete()
+        except Exception as e:
+            print(e)
+            return Response({'error': 'Could not delete all translations for given token.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'message': 'Deleted all translations tied to given token.'}, status=status.HTTP_200_OK)
 
 class ProcessTranslationsView(APIView):
     """
@@ -305,3 +320,31 @@ class TranslationView(APIView):
         # Throw a bad request if the translation doesn't exist
         except Translation.DoesNotExist:
             return Response({"error": "translation doesn't exist!"}, status=status.HTTP_404_NOT_FOUND)
+
+class PullTranslations(APIView):
+    """
+    Pulls all translations for a given token.
+    """
+    @require_valid_token
+    def get(self, request):
+        token = request.token
+
+        try:
+            translations = Translation.objects.filter(token=token)
+
+            # Consolidate all translations into single dictionary following
+            # the format of local translation files to overwrite files easily.
+            response_data = {}
+            for translation in translations:
+                language = translation.language.lower()
+                original_word = translation.original_word
+                translated_word = translation.translated_word
+
+                if language not in response_data:
+                    response_data[language] = {}
+                response_data[language][original_word] = translated_word
+        except Exception as e:
+            print(e)
+            return Response({"error": "could not fetch translations"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(response_data, status=status.HTTP_200_OK)

@@ -1,6 +1,9 @@
-import unittest, os, json, timeit
+import unittest, os, json, timeit, shutil, requests
 from unittest.mock import patch
 from src.internationalize.helpers import delete_translation, get_json, make_translation_map, get_translation, add_language, add_update_translated_word
+from src.internationalize import globals
+from src.internationalize.sync_processor import pull_translations, push_translations
+from src.internationalize.diffing_processor import DiffingProcessor
 
 # Create your tests here.            
 # To test:
@@ -9,6 +12,7 @@ from src.internationalize.helpers import delete_translation, get_json, make_tran
 class TestCLI(unittest.TestCase):                
     def setUp(self):
         self.languages_dir = "src/internationalize/languages"
+        self.reset_token_endpoint = globals.API_BASE_URL + "test/"
         os.makedirs(self.languages_dir, exist_ok=True)
 
     def test_add_new_language(self):
@@ -76,14 +80,14 @@ class TestCLI(unittest.TestCase):
         language = "German"
         add_language(language)
         file_path = os.path.join(self.languages_dir, f"{language.lower()}.json")
-        
+
         initial_translations = {
             "goodbye": "auf Wiedersehen",
             "thank you": "danke"
         }
         with open(file_path, "w") as file:
             json.dump(initial_translations, file, indent=4)
-        
+
         data = get_json(file_path)
         self.assertIn("goodbye", data)
         self.assertEqual(data["goodbye"], "auf Wiedersehen")
@@ -111,13 +115,13 @@ class TestCLI(unittest.TestCase):
         language = "Chinese"
         add_language(language)
         file_path = os.path.join(self.languages_dir, f"{language.lower()}.json")
-        
+
         initial_translations = {
             "thank you": "谢谢"
         }
         with open(file_path, "w") as file:
             json.dump(initial_translations, file, indent=4)
-        
+
         data = get_json(file_path)
         self.assertIn("thank you", data)
         self.assertNotIn("good morning", data)
@@ -136,13 +140,13 @@ class TestCLI(unittest.TestCase):
         language = "Korean"
         add_language(language)
         file_path = os.path.join(self.languages_dir, f"{language.lower()}.json")
-        
+
         initial_translations = {
             "welcome": "환영합니다"
         }
         with open(file_path, "w") as file:
             json.dump(initial_translations, file, indent=4)
-        
+
         data = get_json(file_path)
         self.assertIn("welcome", data)
         self.assertEqual(data["welcome"], "환영합니다")
@@ -156,6 +160,121 @@ class TestCLI(unittest.TestCase):
         data = get_json(file_path)
         self.assertIn("welcome", data)
         self.assertEqual(data["welcome"], "환영합니다")
+
+
+    """
+    Commenting out push and pull tests because they need the backend to be running.
+    GitHub CI is not configured to start the backend before running tests.
+    """
+
+    # def test_pull_translations(self):
+    #     # Set global token to test token (Note: test will fail if translations
+    #     # tied token are modified) 
+    #     prev_token = globals.token.value
+    #     test_token = "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
+    #     globals.token.value = test_token
+    #
+    #     # Initialize DiffingProcessor with test directory
+    #     temp_dir_path = os.path.join(self.languages_dir, "temp")
+    #     diff_processor = DiffingProcessor(temp_dir_path)
+    #     if os.path.exists(diff_processor.diff_state_root_dir):
+    #         shutil.rmtree(diff_processor.diff_state_root_dir)
+    #     diff_processor.setup()
+    #
+    #     # Create temporary directories to pull translations
+    #     if os.path.exists(temp_dir_path):
+    #         shutil.rmtree(temp_dir_path)
+    #     os.mkdir(temp_dir_path)
+    #
+    #     # Copy test files into temp dir to test overwriting
+    #     files_to_copy = ["spanish.json", "french.json"]
+    #     for file_name in files_to_copy:
+    #         curr_file_path = os.path.join(self.languages_dir, file_name)
+    #         new_file_path = os.path.join(temp_dir_path, file_name)
+    #         shutil.copy(curr_file_path, new_file_path)
+    #
+    #     # Expected content after pulling from API
+    #     expected_file_content = {
+    #         "fr.json": {
+    #             "hello": "bonjour"
+    #         },
+    #         "french.json": {
+    #             "hello": "bonjour"
+    #         },
+    #         "spanish.json": {
+    #             "hello": "hola",
+    #             "bye": "chau",
+    #             "what": "que",
+    #             "como": "how",
+    #             "codigo": "code"
+    #         }
+    #     }
+    #
+    #     pull_translations(write_directory=temp_dir_path)
+    #     for file_name in os.listdir(temp_dir_path):
+    #         file_path = os.path.join(temp_dir_path, file_name)
+    #         file_content = get_json(file_path)
+    #         self.assertEqual(file_content, expected_file_content[file_name])
+    #
+    #     # Cleanup
+    #     shutil.rmtree(diff_processor.diff_state_root_dir)
+    #     shutil.rmtree(temp_dir_path)
+    #     globals.token.value = prev_token
+    #
+    # def test_push_translations(self):
+    #     # Set global token to test token
+    #     prev_token = globals.token.value
+    #     test_token = "a373fc5e-5b65-463e-b89e-1a37706a69dd"
+    #     globals.token.value = test_token
+    #
+    #     # Initialize DiffingProcessor with test directory
+    #     temp_dir_path = os.path.join(self.languages_dir, "temp")
+    #     diff_processor = DiffingProcessor(temp_dir_path)
+    #
+    #     # Remove any persisting test data from previous tests (in case of a test failure)
+    #     if os.path.exists(diff_processor.diff_state_root_dir):
+    #         shutil.rmtree(diff_processor.diff_state_root_dir)
+    #     if os.path.exists(temp_dir_path):
+    #         shutil.rmtree(temp_dir_path)
+    #     os.mkdir(temp_dir_path)
+    #
+    #     # Initialize with no translations in either state
+    #     diff_processor.setup()
+    #
+    #     # Deletes all translations tied to test_token
+    #     response = requests.delete(self.reset_token_endpoint, headers={'Token': test_token})
+    #     self.assertTrue(response.ok)
+    #
+    #     # Copy files to push to API
+    #     files_to_copy = ["spanish.json", "french.json"]
+    #     for file_name in files_to_copy:
+    #         curr_file_path = os.path.join(self.languages_dir, file_name)
+    #         new_file_path = os.path.join(temp_dir_path, file_name)
+    #         shutil.copy(curr_file_path, new_file_path)
+    #
+    #     # Push changes, delete copied files, and pull
+    #     push_translations(translations_dir=temp_dir_path)
+    #     shutil.rmtree(temp_dir_path)
+    #     os.mkdir(temp_dir_path)
+    #     pull_translations(write_directory=temp_dir_path)
+    #
+    #     # Expected content after pulling from API (same content that was pushed)
+    #     expected_file_content = {}
+    #     for file_name in files_to_copy:
+    #         copied_file_path = os.path.join(self.languages_dir, file_name)
+    #         expected_file_content[file_name] = get_json(copied_file_path)
+    #
+    #     pulled_files = os.listdir(temp_dir_path)
+    #     self.assertEqual(len(pulled_files), 2)
+    #     for file_name in os.listdir(temp_dir_path):
+    #         file_path = os.path.join(temp_dir_path, file_name)
+    #         file_content = get_json(file_path)
+    #         self.assertEqual(file_content, expected_file_content[file_name])
+    #
+    #     # Cleanup
+    #     shutil.rmtree(diff_processor.diff_state_root_dir)
+    #     shutil.rmtree(temp_dir_path)
+    #     globals.token.value = prev_token
 
 if __name__ == '__main__':
     unittest.main()

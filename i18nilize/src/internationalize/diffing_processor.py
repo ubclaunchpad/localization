@@ -1,6 +1,7 @@
 import os
 import hashlib
 import json
+import logging
 from dirsync import sync
 from . import globals
 from src.internationalize.helpers import compute_hash, compute_hashes, read_json_file
@@ -18,6 +19,7 @@ Diffing Processor Class
 """
 class DiffingProcessor():
     def __init__(self, curr_translations_dir):
+        logging.getLogger('dirsync').disabled = True
         self.diff_state_root_dir = "diff_state"
         self.diff_state_files_dir = os.path.join(self.diff_state_root_dir, "translations")
         self.metadata_file_dir = os.path.join(self.diff_state_root_dir, "metadata.json")
@@ -28,8 +30,10 @@ class DiffingProcessor():
     """
     def setup(self):
         try:
-            os.mkdir(self.diff_state_root_dir)
-            os.mkdir(self.diff_state_files_dir)
+            if not os.path.exists(self.diff_state_root_dir):
+                os.mkdir(self.diff_state_root_dir)
+            if not os.path.exists(self.diff_state_files_dir):
+                os.mkdir(self.diff_state_files_dir)
             with open(self.metadata_file_dir, "w") as outfile:
                 json.dump({}, outfile)
 
@@ -50,7 +54,9 @@ class DiffingProcessor():
     """
     Updates translation files with new changes and updates hashes in metadata.
     """
-    def update_to_current_state(self, hash_dict):
+    def update_to_current_state(self, hash_dict=None):
+        if hash_dict == None:
+            hash_dict = compute_hashes(self.curr_translation_files_dir)
         self.update_metadata(hash_dict)
         self.sync_translations()
 
