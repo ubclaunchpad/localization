@@ -30,13 +30,13 @@ class TestErrorHandler(unittest.TestCase):
     
     def test_invalid_file_individual(self):
         language = "invalid_file.json"
-        self.assertEqual(self.handler.handle_invalid_file(language), "Invalid Language File, try fixing the json format.")
+        self.assertEqual(self.handler.handle_invalid_file(language), "Invalid language file, try fixing the json format.")
 
     # ================== Test Error Handler ================================
     def test_invalid_file(self):
         print("invalid File Test: ")
         language = "invalid_file.json"
-        self.assertEqual(self.handler.handle_error(language), "Invalid Language File, try fixing the json format.")
+        self.assertEqual(self.handler.handle_error(language), "Invalid language file, try fixing the json format.")
 
     def test_non_string_values(self):
         language = "non_string_values.json"

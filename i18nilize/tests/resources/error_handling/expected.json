@@ -1,5 +1,5 @@
 {
-    "invalid_file.json": "Invalid Language File, try fixing the json format.",
+    "invalid_file.json": "Invalid language file, try fixing the json format.",
     "empty_keys.json": "Key is empty or contains only whitespace.",
     "non_string_values.json": "Value is not a string.",
     "combined_issues.json": "Value is not a string."
