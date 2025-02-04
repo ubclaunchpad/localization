@@ -65,7 +65,7 @@ class ErrorHandler():
             with open(language_location, "r") as file:
                 json.load(file)
         except json.JSONDecodeError as e:
-            return "Invalid Language File, try fixing the json format."
+            return "Invalid language file, try fixing the json format."
         except Exception as e:
             print(f"Unexpected Error: {e}")
             raise e
