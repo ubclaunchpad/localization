@@ -2,7 +2,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Token, Translation
+from .models import MicroserviceToken, Token, Translation, Writer
 from i18nilize.utils import is_valid_uuid
 from i18nilize.utils import require_valid_token
 from i18nilize.services import translation_processor as tp
@@ -348,3 +348,71 @@ class PullTranslations(APIView):
             return Response({"error": "could not fetch translations"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(response_data, status=status.HTTP_200_OK)
+    
+class WriterPermissionView(APIView):
+    """
+    API endpoint to grant writer permissions to a microservice.
+    
+    The microservice must include its unique microservice token either in the
+    'Microservice-Token' header or in the request body under 'microservice_token'.
+    
+    The view looks up the MicroserviceToken instance, gets its associated project token,
+    and then creates (or updates) a Writer record so that the microservice has writer permissions.
+    """
+
+    def post(self, request):
+        # obtain the microservice token from headers or request data
+        microservice_token_value = (
+            request.headers.get("Microservice-Token") or 
+            request.data.get("microservice_token")
+        )
+        if not microservice_token_value:
+            return Response(
+                {"error": "Microservice token is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not is_valid_uuid(microservice_token_value):
+            return Response(
+                {"error": "Invalid microservice token."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # get the MicroserviceToken instance
+        try:
+            microservice_token = MicroserviceToken.objects.get(
+                microservice_token=microservice_token_value
+            )
+        except MicroserviceToken.DoesNotExist:
+            return Response(
+                {"error": "Microservice token not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        project_token = microservice_token.project_token
+
+        # check if a Writer record already exists for this project
+        writer_permission = Writer.objects.filter(project_token=project_token).first()
+        if writer_permission:
+            # if the current microservice is already the writer, no change is needed
+            if writer_permission.editor_token == microservice_token:
+                return Response(
+                    {"message": "Microservice already has writer permissions."},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                # another microservice already holds writer permissions
+                return Response(
+                    {"error": "Writer permissions already granted to another microservice."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        else:
+            # no writer exists for this project yet, grant writer permissions
+            writer_permission = Writer.objects.create(
+                project_token=project_token,
+                editor_token=microservice_token
+            )
+            return Response(
+                {"message": "Writer permissions granted."},
+                status=status.HTTP_201_CREATED
+            )
