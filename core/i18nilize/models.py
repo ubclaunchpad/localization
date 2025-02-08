@@ -18,7 +18,7 @@ class Translation(models.Model):
 
 class MicroserviceToken(models.Model):
     microservice_token = models.UUIDField(unique=True, default=uuid.uuid4, editable=False)
-    project_token = models.ForeignKey(Token, on_delete=models.SET_NULL)
+    project_token = models.ForeignKey(Token, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
