@@ -21,7 +21,7 @@ Diffing Processor Class
 class DiffingProcessor():
     def __init__(self, curr_translations_dir=None):
         logging.getLogger('dirsync').disabled = True
-        self.root_dir = curr_translations_dir if curr_translations_dir else ROOT_DIRECTORY
+        self.root_dir = ROOT_DIRECTORY if curr_translations_dir is None else curr_translations_dir
 
         print(f"[DEBUG] ROOT_DIRECTORY is set to: {ROOT_DIRECTORY}")
         print(f"[DEBUG] self.root_dir is set to: {self.root_dir}")

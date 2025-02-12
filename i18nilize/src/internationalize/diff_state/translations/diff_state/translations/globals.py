@@ -7,40 +7,21 @@ import sys
 
 class GlobalToken:
     def __init__(self):
-        self.value = "ae54501d-48c1-4a05-80d3-2b4d417de771"
+        self.value = "be75d9b5-7785-4594-957c-59431c897acd"
 
 CONFIG_FILE = os.path.expanduser("~/.i18nilize_config.json")
 
-def find_project_root(start_path=None):
-    """Finds the root directory of the project by locating a `.git` folder."""
-    if start_path is None:
-        start_path = os.getcwd()  
-
-    current_path = os.path.abspath(start_path)
-
-    while current_path != os.path.dirname(current_path):  
-        if os.path.isdir(os.path.join(current_path, ".git")):
-            return current_path  
-        current_path = os.path.dirname(current_path) 
-
-    return None  
-
 def get_installation_directory():
-    """Gets the root directory of the project."""
-    git_root = find_project_root()
-    if git_root:
-        return git_root  
-
     if os.path.exists(CONFIG_FILE):
         with open(CONFIG_FILE, "r") as f:
             config = json.load(f)
             return config.get("installation_dir")
-
-    return os.getcwd()  
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if "env" in current_dir:
+        current_dir = os.path.dirname(current_dir)
+    return current_dir
 
 ROOT_DIRECTORY = get_installation_directory()
-
-print(f"[DEBUG] ROOT_DIRECTORY is set to: {ROOT_DIRECTORY}")
 
 API_BASE_URL = "http://localhost:8000/api/"
 
