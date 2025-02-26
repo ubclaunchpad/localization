@@ -2,6 +2,5 @@ env/
 **/__pycache__
 myenv
 venv
-i18nilize.egg-info
-localization.egg-info
 **/*.egg-info
+**/diff_state
