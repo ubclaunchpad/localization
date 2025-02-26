@@ -1,12 +1,13 @@
-import os
-import hashlib
 import json
 import logging
+import os
+
 from dirsync import sync
-from . import globals
-from .globals import ROOT_DIRECTORY
-from src.internationalize.helpers import compute_hash, compute_hashes, read_json_file
+
 from src.internationalize.error_handler import ErrorHandler
+from src.internationalize.helpers import compute_hashes, read_json_file
+
+from . import globals
 
 JSON_EXTENSION = ".json"
 
@@ -18,28 +19,31 @@ DELETED = "deleted"
 """
 Diffing Processor Class
 """
-class DiffingProcessor():
-    def __init__(self, curr_translations_dir=None):
-        logging.getLogger('dirsync').disabled = True
-        self.root_dir = curr_translations_dir if curr_translations_dir else ROOT_DIRECTORY
 
-        print(f"[DEBUG] ROOT_DIRECTORY is set to: {ROOT_DIRECTORY}")
-        print(f"[DEBUG] self.root_dir is set to: {self.root_dir}")
-        
-        self.diff_state_root_dir = os.path.join(self.root_dir, "diff_state")
-        self.diff_state_files_dir = os.path.join(self.diff_state_root_dir, "translations")
+
+class DiffingProcessor:
+    def __init__(self, curr_translations_dir=None):
+        logging.getLogger("dirsync").disabled = True
+
+        self.diff_state_root_dir = os.path.join(globals.ROOT_DIRECTORY, "diff_state")
+        self.diff_state_files_dir = os.path.join(
+            self.diff_state_root_dir, "translations"
+        )
         self.metadata_file_dir = os.path.join(self.diff_state_root_dir, "metadata.json")
         self.curr_translation_files_dir = curr_translations_dir
 
     """
     Initializes the old state of translations when package is first installed.
     """
+
     def setup(self):
         try:
             if not os.path.exists(self.diff_state_root_dir):
                 os.mkdir(self.diff_state_root_dir)
+
             if not os.path.exists(self.diff_state_files_dir):
                 os.mkdir(self.diff_state_files_dir)
+
             with open(self.metadata_file_dir, "w") as outfile:
                 json.dump({}, outfile)
 
@@ -47,7 +51,6 @@ class DiffingProcessor():
             self.sync_translations()
 
             # Compute all file hashes and store hashes in metadata
-            all_files = os.listdir(self.diff_state_files_dir)
             all_file_hashes = compute_hashes(self.diff_state_files_dir)
             self.update_metadata(all_file_hashes)
         except FileExistsError:
@@ -60,6 +63,7 @@ class DiffingProcessor():
     """
     Updates translation files with new changes and updates hashes in metadata.
     """
+
     def update_to_current_state(self, hash_dict=None):
         if hash_dict == None:
             hash_dict = compute_hashes(self.curr_translation_files_dir)
@@ -78,11 +82,17 @@ class DiffingProcessor():
             for file, error in errors.items():
                 print(f"{file}: {error}")
             return
-        sync(self.curr_translation_files_dir, self.diff_state_files_dir, "sync", purge=True)
+        sync(
+            self.curr_translation_files_dir,
+            self.diff_state_files_dir,
+            "sync",
+            purge=True,
+        )
 
     """
     Returns a list of all the files that have been modified
     """
+
     def get_changed_files(self):
         # Initialize hashes
         current_hashes = compute_hashes(self.curr_translation_files_dir)
@@ -90,11 +100,7 @@ class DiffingProcessor():
         with open(self.metadata_file_dir, "r") as file:
             original_hashes = json.load(file)
 
-        changed_files = {
-            CREATED: [],
-            MODIFIED: [],
-            DELETED: []
-        }
+        changed_files = {CREATED: [], MODIFIED: [], DELETED: []}
 
         # Find any languages that were either modified or added the current PIP package
         for language, current_hash in current_hashes.items():
@@ -115,6 +121,7 @@ class DiffingProcessor():
     """
     Gets differences between old and new translations
     """
+
     def get_changed_translations(self):
         changed_files = self.get_changed_files()
         changed_translations = {}
@@ -122,23 +129,32 @@ class DiffingProcessor():
         for type, file_names in changed_files.items():
             for file_name in file_names:
                 language = file_name.split(".")[0]
-                changed_translations[language] = self.__initialize_changed_template(type)
+                changed_translations[language] = self.__initialize_changed_template(
+                    type
+                )
 
                 # fetch modified translations
                 if type == MODIFIED:
-                    changed_translations[language] = self.compare_language(file_name, changed_translations[language])
+                    changed_translations[language] = self.compare_language(
+                        file_name, changed_translations[language]
+                    )
 
                 if type == CREATED:
-                    changed_translations[language] = self.add_language(file_name, changed_translations[language])
-        
+                    changed_translations[language] = self.add_language(
+                        file_name, changed_translations[language]
+                    )
+
         return changed_translations
 
     """
     Gets differences between old and new translations for one language
     """
-    def compare_language(self, file_name, changed_translations):        
+
+    def compare_language(self, file_name, changed_translations):
         original_language_location = os.path.join(self.diff_state_files_dir, file_name)
-        current_language_location = os.path.join(self.curr_translation_files_dir, file_name)
+        current_language_location = os.path.join(
+            self.curr_translation_files_dir, file_name
+        )
 
         original_language = read_json_file(original_language_location)
         current_language = read_json_file(current_language_location)
@@ -156,19 +172,22 @@ class DiffingProcessor():
                 changed_translations[DELETED][word] = translation
 
         return changed_translations
-    
+
     def add_language(self, file_name, changed_translations):
-        current_language_location = os.path.join(self.curr_translation_files_dir, file_name)
+        current_language_location = os.path.join(
+            self.curr_translation_files_dir, file_name
+        )
         current_language = read_json_file(current_language_location)
 
         for word, translation in current_language.items():
             changed_translations[CREATED][word] = translation
 
         return changed_translations
-    
+
     """
     Create empty JSON template to show modifications from a language
     """
+
     def __initialize_changed_template(self, type):
         changed_translations = {}
         changed_translations[TYPE] = type
