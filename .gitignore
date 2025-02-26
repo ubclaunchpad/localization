@@ -3,3 +3,5 @@ env/
 myenv
 venv
 i18nilize.egg-info
+localization.egg-info
+**/*.egg-info
