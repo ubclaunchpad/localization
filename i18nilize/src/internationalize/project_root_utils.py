@@ -16,7 +16,7 @@ def get_project_root_directory(config_file_path):
 
     raise FileNotFoundError(
         "Project root directory could not be found. "
-        f"Ensure you are including one of these files/directories in your root directory: {', '.join(TARGET_FILES)}"
+        f"Ensure you are including one of these directories in your root directory: {', '.join(TARGET_FILES)}"
     )
 
 
