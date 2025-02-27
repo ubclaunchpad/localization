@@ -1,4 +1,3 @@
-# from src.internationalize.helpers import add_language
 import argparse
 import os
 
@@ -8,19 +7,12 @@ from src.internationalize.helpers import (
     add_update_translated_word,
     delete_translation,
 )
-from src.internationalize.package_setup import setup_package
+from src.internationalize.package_setup import (
+    create_directories,
+    setup_directories_exist,
+)
 from src.internationalize.project_root_utils import get_project_root_directory
 from src.internationalize.sync_processor import pull_translations, push_translations
-
-
-def initialize_root_directory():
-    try:
-        root_directory = get_project_root_directory(globals.CONFIG_FILE_PATH)
-        globals.ROOT_DIRECTORY = root_directory
-        globals.LANGUAGES_DIR = os.path.join(root_directory, "languages")
-    except FileNotFoundError as err:
-        print("ERROR:", err)
-        exit(1)
 
 
 def cli():
@@ -66,6 +58,12 @@ def cli():
     args = parser.parse_args()
 
     # depending on the command, do different things
+    if args.command == "setup":
+        setup_package()
+        return
+
+    validate_setup_directories(globals.ROOT_DIRECTORY)
+
     if args.command == "add-language":
         add_language(args.language)
     elif args.command == "add" or args.command == "update":
@@ -78,10 +76,34 @@ def cli():
         pull_translations()
     elif args.command == "push":
         push_translations()
-    elif args.command == "setup":
-        setup_package()
     else:
         print("Invalid command.")
+
+
+def initialize_root_directory():
+    try:
+        root_directory = get_project_root_directory(globals.CONFIG_FILE_PATH)
+        globals.ROOT_DIRECTORY = root_directory
+        globals.LANGUAGES_DIR = os.path.join(root_directory, "languages")
+    except FileNotFoundError as err:
+        print("Error:", err)
+        exit(1)
+
+
+def validate_setup_directories(root_directory):
+    if not setup_directories_exist(root_directory):
+        print(
+            'Error: i18nilize has not been setup yet. Run "i18nilize setup" to initialize the package.'
+        )
+        exit(1)
+
+
+def setup_package():
+    try:
+        create_directories()
+    except FileExistsError as err:
+        print("Error:", err)
+        exit(1)
 
 
 if __name__ == "__main__":

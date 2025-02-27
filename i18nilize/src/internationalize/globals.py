@@ -4,7 +4,7 @@ import os
 
 class GlobalToken:
     def __init__(self):
-        self.value = "dummy"
+        self.value = "replace_with_valid_token"
 
 
 CONFIG_FILE_PATH = os.path.expanduser("~/.i18nilize_config.json")
