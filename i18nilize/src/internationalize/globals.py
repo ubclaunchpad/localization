@@ -8,6 +8,7 @@ class GlobalToken:
 
 
 CONFIG_FILE_PATH = os.path.expanduser("~/.i18nilize_config.json")
+
 # Directory values are set dynamically on startup in command_line.py
 ROOT_DIRECTORY = ""
 LANGUAGES_DIR = ""

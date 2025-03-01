@@ -82,7 +82,7 @@ def cli():
 
 def initialize_root_directory():
     try:
-        root_directory = get_project_root_directory(globals.CONFIG_FILE_PATH)
+        root_directory = get_project_root_directory()
         globals.ROOT_DIRECTORY = root_directory
         globals.LANGUAGES_DIR = os.path.join(root_directory, "languages")
     except FileNotFoundError as err:
