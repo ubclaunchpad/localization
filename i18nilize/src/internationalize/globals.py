@@ -6,12 +6,11 @@ from .project_root_utils import get_project_root_directory
 # Test Token: "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
 class GlobalToken:
     def __init__(self):
-        self.value = "9af7f4cd-8c81-41a2-abac-0faf8d6a2902"
+        self.value = "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
 
-
-# Directory values are set dynamically on startup in command_line.py
-ROOT_DIRECTORY = ""
-LANGUAGES_DIR = ""
+class MSGlobalToken:
+    def __init__(self):
+        self.value = ""
 
 API_BASE_URL = "http://localhost:8000/api"
 TOKEN_ENDPOINT = f"{API_BASE_URL}/token"

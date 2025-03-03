@@ -37,6 +37,8 @@ class DiffingProcessor:
     """
 
     def setup(self):
+        ms_token = create_ms_token()
+        
         try:
             if not os.path.exists(self.diff_state_root_dir):
                 os.mkdir(self.diff_state_root_dir)
