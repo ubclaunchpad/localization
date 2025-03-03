@@ -6,7 +6,7 @@ from .project_root_utils import get_project_root_directory
 # Test Token: "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
 class GlobalToken:
     def __init__(self):
-        self.value = "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
+        self.value = "dummy-value"
 
 class MSGlobalToken:
     def __init__(self):
