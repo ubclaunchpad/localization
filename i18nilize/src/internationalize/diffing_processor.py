@@ -6,6 +6,7 @@ from dirsync import sync
 from . import globals
 from src.internationalize.helpers import compute_hash, compute_hashes, read_json_file
 from src.internationalize.error_handler import ErrorHandler
+from src.internationalize.api_helpers import create_ms_token
 
 JSON_EXTENSION = ".json"
 
@@ -29,6 +30,8 @@ class DiffingProcessor():
     Initializes the old state of translations when package is first installed.
     """
     def setup(self):
+        ms_token = create_ms_token()
+        
         try:
             if not os.path.exists(self.diff_state_root_dir):
                 os.mkdir(self.diff_state_root_dir)

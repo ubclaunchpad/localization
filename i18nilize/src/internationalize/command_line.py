@@ -1,10 +1,10 @@
 #from src.internationalize.helpers import add_language
 import json
 import argparse
-from src.internationalize.helpers import add_language, add_update_translated_word, delete_translation
-from src.internationalize.sync_processor import pull_translations, push_translations
-from src.internationalize.diffing_processor import DiffingProcessor
-from src.internationalize import globals
+from .helpers import add_language, add_update_translated_word, delete_translation
+from .sync_processor import pull_translations, push_translations
+from .diffing_processor import DiffingProcessor
+from . import globals
 
 def cli():
     # initialize the parser

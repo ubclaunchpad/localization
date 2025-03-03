@@ -42,6 +42,41 @@ class TokenView(APIView):
             return Response(data, status=status.HTTP_200_OK)
         except Token.DoesNotExist:
             return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+class MSTokenView(APIView):
+    """
+    Endpoint to create a new token or retrieve a token by its ID.
+    """
+
+    def post(self, request):
+        """
+        Create a new token.
+        """
+        token = MicroserviceToken.objects.create()
+        data = {
+            'id': token.id,
+            'value': str(token.value),
+            'created_at': token.created_at.isoformat()
+        }
+        return Response(data, status=status.HTTP_201_CREATED)
+
+    def get(self, request, value=None):
+        """
+        Retrieve a token by its value
+        """
+        if value is None:
+            return Response({'error': 'Token value is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token = MicroserviceToken.objects.get(value=value)
+            data = {
+                'id': token.id,
+                'value': str(token.value),
+                'created_at': token.created_at.isoformat()
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        except MicroserviceToken.DoesNotExist:
+            return Response({'error': 'Token not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 class TestTokenView(APIView):
     """

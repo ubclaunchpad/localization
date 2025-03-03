@@ -19,6 +19,22 @@ def create_token():
             raise Exception(f"Failed to retrieve token. Status code: {response.status_code}")
     except requests.RequestException as e:
         raise Exception(f"HTTP Request failed: {e}")
+    
+def create_ms_token():
+    """
+    Creates a new microservice token by making a POST request to the central API.
+    """
+    url = globals.MS_TOKEN_ENDPOINT
+    try:
+        response = requests.post(url)
+        if response.status_code == 201:
+            token_value = response.json().get("value")
+            globals.ms_token.value = token_value 
+            print("Microservice Token set.")
+        else:
+            raise Exception(f"Failed to retrieve token. Status code: {response.status_code}")
+    except requests.RequestException as e:
+        raise Exception(f"HTTP Request failed: {e}")
 
 def fetch_translation_data(language):
     """
