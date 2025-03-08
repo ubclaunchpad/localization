@@ -12,12 +12,14 @@ class MSGlobalToken:
     def __init__(self):
         self.value = ""
 
-API_BASE_URL = "http://localhost:8000/api"
-TOKEN_ENDPOINT = f"{API_BASE_URL}/token"
-TRANSLATIONS_ENDPOINT = f"{API_BASE_URL}/translations/"
-PULL_TRANSLATIONS_ENDPOINT = f"{API_BASE_URL}/translations/pull/"
-PUSH_TRANSLATIONS_ENDPOINT = f"{API_BASE_URL}/translations/push/"
+API_BASE_URL = "http://localhost:8000/api/"
 
+TOKEN_ENDPOINT = f"{API_BASE_URL}token/"
+MS_TOKEN_ENDPOINT = f"{API_BASE_URL}ms-token/"
+TRANSLATIONS_ENDPOINT = f"{API_BASE_URL}translations/"
+PULL_TRANSLATIONS_ENDPOINT = f"{TRANSLATIONS_ENDPOINT}pull/"
+PUSH_TRANSLATIONS_ENDPOINT = f"{TRANSLATIONS_ENDPOINT}push/"
+WRITER_PERMISSIONS_ENDPOINT = f"{TRANSLATIONS_ENDPOINT}writer-permission/"
 
 def initialize_root_directory():
     try:

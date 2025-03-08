@@ -66,3 +66,26 @@ def fetch_translation_data(language):
             raise Exception(f"No translations found for language: {language}")
     except requests.RequestException as e:
         raise Exception(f"HTTP Request failed: {e}")
+
+# return true if ms_token has writer permissions
+# else false
+def has_writer_permissions(ms_token):
+    try:
+        response = requests.post(globals.WRITER_PERMISSIONS_ENDPOINT, headers={'Microservice-Token': ms_token})
+
+        if response.status_code == 200:
+            data = response.json()
+            editor_token = data.get("editor_token")
+            return editor_token == ms_token
+        
+        elif response.status_code == 404:
+            print("project that ms_token is in has not initialized reader/writer permissions yet.")
+            return False
+        
+        else:
+            raise Exception(f"Bad HTTP Request: {e}")
+        
+
+
+    except requests.RequestException as e:
+        raise Exception(f"HTTP Request failed: {e}")

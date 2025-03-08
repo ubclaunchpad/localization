@@ -392,7 +392,7 @@ class WriterPermissionView(APIView):
     'Microservice-Token' header or in the request body under 'microservice_token'.
     
     The view looks up the MicroserviceToken instance, gets its associated project token,
-    and then creates, updates, or deletes a Writer record so that the microservice can manage their writer permissions.
+    and then creates, updates, reads, or deletes a Writer record so that the microservice can manage their writer permissions.
     """
 
     def post(self, request):
@@ -416,7 +416,7 @@ class WriterPermissionView(APIView):
         # get the MicroserviceToken instance
         try:
             microservice_token = MicroserviceToken.objects.get(
-                microservice_token=microservice_token_value
+                value=microservice_token_value
             )
         except MicroserviceToken.DoesNotExist:
             return Response(
@@ -429,8 +429,17 @@ class WriterPermissionView(APIView):
         # check if a Writer record already exists for this project
         writer_permission = Writer.objects.filter(project_token=project_token).first()
         if writer_permission:
+            # if project doesn't have any writer tokens assigned yet
+            if not writer_permission.editor_token:
+                writer_permission.editor_token = microservice_token
+                writer_permission.save()
+                return Response(
+                    {"message": "Writer permissions granted."},
+                    status=status.HTTP_200_OK
+                )
+
             # if the current microservice is already the writer, no change is needed
-            if writer_permission.editor_token == microservice_token:
+            elif writer_permission.editor_token == microservice_token:
                 return Response(
                     {"message": "Microservice already has writer permissions."},
                     status=status.HTTP_200_OK
@@ -450,6 +459,53 @@ class WriterPermissionView(APIView):
             return Response(
                 {"message": "Writer permissions granted."},
                 status=status.HTTP_201_CREATED
+            )
+        
+    def get(self, request):
+        # obtain the microservice token from headers or request data
+        microservice_token_value = (
+            request.headers.get("Microservice-Token") or 
+            request.data.get("microservice_token")
+        )
+        if not microservice_token_value:
+            return Response(
+                {"error": "Microservice token is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not is_valid_uuid(microservice_token_value):
+            return Response(
+                {"error": "Invalid microservice token."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # get the MicroserviceToken instance
+        try:
+            microservice_token = MicroserviceToken.objects.get(
+                value=microservice_token_value
+            )
+        except MicroserviceToken.DoesNotExist:
+            return Response(
+                {"error": "Microservice token not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        project_token = microservice_token.project_token
+
+        # check if a Writer record already exists for this project
+        writer_permission = Writer.objects.filter(project_token=project_token).first()
+        if writer_permission:
+            data = {
+                "project_token": writer_permission.project_token,
+                "editor_token": writer_permission.editor_token
+            }
+            return Response(data, status=status.HTTP_200_OK)
+        
+        # reader/writer permissions not initialized for current project
+        else:
+            return Response(
+                {"message": "Current project has not initialized reader/writer permissions yet."},
+                status=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -474,7 +530,7 @@ class WriterPermissionView(APIView):
         # get the MicroserviceToken instance
         try:
             microservice_token = MicroserviceToken.objects.get(
-                microservice_token=microservice_token_value
+                value=microservice_token_value
             )
         except MicroserviceToken.DoesNotExist:
             return Response(
@@ -487,6 +543,12 @@ class WriterPermissionView(APIView):
         # check if a Writer record exists for this project
         writer_permission = Writer.objects.filter(project_token=project_token).first()
         if writer_permission:
+            # if project doesn't have any writer tokens assigned yet
+            if not writer_permission.editor_token:
+                return Response(
+                    {"error": "Remove failed, no existing editor token found for project"},
+                    status=status.HTTP_404_NOT_FOUND)
+
             # if the current microservice is the writer, remove successfuly
             if writer_permission.editor_token == microservice_token:
                 writer_permission = Writer.objects.get(
@@ -511,5 +573,5 @@ class WriterPermissionView(APIView):
         else:
             # no writer exists for this project yet, cannot remove
             return Response(
-                {"error": "Remove failed, no existing editor token found for project"},
+                {"error": "Writer permissions has not been initialized for current project"},
                 status=status.HTTP_404_NOT_FOUND)

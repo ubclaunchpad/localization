@@ -6,6 +6,7 @@ import requests
 from .diffing_processor import DiffingProcessor
 
 from . import globals
+from .api_helpers import has_writer_permissions
 
 """
 Pulls all translations assigned to the microservices' token
@@ -44,7 +45,14 @@ Push all local translations to the API.
 
 def push_translations():
     token = globals.token.value
-    diff_processor = DiffingProcessor(globals.LANGUAGES_DIR)
+    ms_token = globals.ms_token.value
+
+    # make sure current microservice token has writer permissions
+    if not has_writer_permissions(ms_token):
+        print("Error: this microservice does not have writer permissions. Use the CLI to change writer permissions and try again.")
+        return
+
+    diff_processor = DiffingProcessor(translations_dir)
     changed_translations = diff_processor.get_changed_translations()
 
     for language in changed_translations:
@@ -95,4 +103,4 @@ def push_translations():
                 print("Error: Could not delete translation.", e)
 
     diff_processor.update_to_current_state()
-    print("Pushed all translations from the database.")
+    print(f"Pushed all local translations to the database.")
