@@ -4,3 +4,4 @@ myenv
 venv
 **/*.egg-info
 **/diff_state
+**/test_directory_do_not_commit
