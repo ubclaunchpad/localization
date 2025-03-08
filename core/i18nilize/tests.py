@@ -1084,7 +1084,7 @@ class WriterPermissionViewTests(APITestCase):
         # validate get request
         response = self.client.get(reverse('writer-permission'), headers=headers, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["editor_token"], self.TEST_MS_TOKEN_1a)
+        self.assertEqual(response.data["editor_token"], str(self.TEST_MS_TOKEN_1a))
 
     def test_post_writer_already_exists(self):
         pass
@@ -1101,6 +1101,7 @@ class WriterPermissionViewTests(APITestCase):
         # validate delete request
         response = self.client.delete(reverse('writer-permission'), headers=headers, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["project"], str(self.TEST_PROJECT_TOKEN_1))
 
         # confirm editor token no longer exists:
         response = self.client.get(reverse('writer-permission'), headers=headers, format='json')

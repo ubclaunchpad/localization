@@ -49,7 +49,8 @@ def push_translations():
 
     # make sure current microservice token has writer permissions
     if not has_writer_permissions(ms_token):
-        print("Error: this microservice does not have writer permissions. Use the CLI to change writer permissions and try again.")
+        error_msg = "Error: this microservice does not have writer permissions. Use the CLI to change writer permissions and try again."
+        print(error_msg)
         return
 
     diff_processor = DiffingProcessor(translations_dir)

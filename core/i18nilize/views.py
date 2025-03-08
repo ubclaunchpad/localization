@@ -496,8 +496,8 @@ class WriterPermissionView(APIView):
         writer_permission = Writer.objects.filter(project_token=project_token).first()
         if writer_permission:
             data = {
-                "project_token": writer_permission.project_token,
-                "editor_token": writer_permission.editor_token
+                "project_token": str(writer_permission.project_token),
+                "editor_token": str(writer_permission.editor_token) if writer_permission.editor_token else None
             }
             return Response(data, status=status.HTTP_200_OK)
         
@@ -551,14 +551,12 @@ class WriterPermissionView(APIView):
 
             # if the current microservice is the writer, remove successfuly
             if writer_permission.editor_token == microservice_token:
-                writer_permission = Writer.objects.get(
-                    project_token=project_token,
-                    editor_token=microservice_token
-                )
-                writer_permission.delete()
+                writer_permission.editor_token = None
+                writer_permission.save()
+
                 data = {
                     "message": "Writer permissions removed successfuly!",
-                    "project": project_token
+                    "project": str(project_token)
                 }
                 return Response(
                     data,
