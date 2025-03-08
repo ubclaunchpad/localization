@@ -1,7 +1,7 @@
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from .models import Token, Translation
+from .models import Token, Translation, MicroserviceToken, Writer
 from .services.translation_processor import bulk_create_translations, bulk_update_translations, get_translations_by_language
 
 
@@ -1050,3 +1050,65 @@ class PullTranslations(APITestCase):
         response = self.client.get(reverse('pull-translations'), headers=headers, format='json')
         response_data = response.json()
         self.assertEqual(response_data, expected_response)
+
+
+class WriterPermissionViewTests(APITestCase):
+    def setUp(self):
+        # First Group
+        project_token_1 = Token.objects.create()
+        self.TEST_PROJECT_TOKEN_1 = str(project_token_1.value)
+
+        ms_token_1a = MicroserviceToken.objects.create(project_token=project_token_1)
+        self.TEST_MS_TOKEN_1a = str(ms_token_1a.value)
+
+        ms_token_1b = MicroserviceToken.objects.create(project_token=project_token_1)
+        self.TEST_MS_TOKEN_1b = str(ms_token_1b.value)
+
+        # Second Group
+        project_token_2 = Token.objects.create()
+        self.TEST_PROJECT_TOKEN_2 = str(project_token_2.value)
+
+        ms_token_2 = MicroserviceToken.objects.create(project_token=project_token_2)
+        self.TEST_MS_TOKEN_2 = str(ms_token_2.value)
+
+
+    def test_valid_post(self):
+        headers = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1a
+        }
+
+        # validate post request
+        response = self.client.post(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # validate get request
+        response = self.client.get(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["editor_token"], self.TEST_MS_TOKEN_1a)
+
+    def test_post_writer_already_exists(self):
+        pass
+
+    def test_valid_delete(self):
+        headers = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1a
+        }
+
+        # validate post request
+        response = self.client.post(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # validate delete request
+        response = self.client.delete(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # confirm editor token no longer exists:
+        response = self.client.get(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data["editor_token"])
+
+    def test_delete_different_writer(self):
+        pass
+
+    def test_delete_no_writers(self):
+        pass 
