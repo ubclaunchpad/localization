@@ -22,10 +22,10 @@ class MicroserviceToken(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Microservice Token: {str(self.value)} - Project Token: {str(self.project_token)}"
+        return str(self.value)
 
 class Writer(models.Model):
-    project_token = models.ForeignKey(Token, on_delete=models.CASCADE)
+    project_token = models.ForeignKey(Token, on_delete=models.CASCADE, null=False, blank=False)
     editor_token = models.ForeignKey(MicroserviceToken, null=True, on_delete=models.SET_NULL, related_name="write_permissions")
 
     # Ensures that a project token (and editor token) can only appear once in writer
