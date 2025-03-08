@@ -1,7 +1,7 @@
 # Test Token: "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
 class GlobalToken:
     def __init__(self):
-        self.value = "replace_with_valid_token"
+        self.value = "9af7f4cd-8c81-41a2-abac-0faf8d6a2902"
 
 
 # Directory values are set dynamically on startup in command_line.py
