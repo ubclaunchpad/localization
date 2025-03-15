@@ -26,6 +26,8 @@ dependencies = [
 [tool.poetry]
 packages = [{ include = "i18nilize", from = "." }]
 
+[tool.poetry.scripts]
+i18nilize = "i18nilize.src.internationalize.command_line:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
