@@ -1086,8 +1086,43 @@ class WriterPermissionViewTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["editor_token"], str(self.TEST_MS_TOKEN_1a))
 
+    def test_post_when_already_have_permissions(self):
+        """Test POST when the microservice already has writer permissions"""
+        headers = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1a
+        }
+
+        # get writer permission
+        response = self.client.post(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # try again
+        response = self.client.post(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['message'], 'Microservice already has writer permissions.')
+
+
     def test_post_writer_already_exists(self):
-        pass
+        """Test POST when another microservice already has writer permissions"""
+        # 1st microservice gets writer permission
+        headers_1a = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1a
+        }
+        
+        response = self.client.post(reverse('writer-permission'), headers=headers_1a, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # 2nd microservice tries to get writer permission
+        headers_1b = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1b
+        }
+        response = self.client.post(reverse('writer-permission'), headers=headers_1b, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.data['error'], 'Writer permissions already granted to another microservice.')
+
+        # verify the permissions didn't change
+        writer_permission = Writer.objects.filter(project_token__value=self.TEST_PROJECT_TOKEN_1).first()
+        self.assertEqual(str(writer_permission.editor_token.value), self.TEST_MS_TOKEN_1a)
 
     def test_valid_delete(self):
         headers = {
