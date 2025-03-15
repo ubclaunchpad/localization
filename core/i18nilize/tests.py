@@ -1109,7 +1109,62 @@ class WriterPermissionViewTests(APITestCase):
         self.assertIsNone(response.data["editor_token"])
 
     def test_delete_different_writer(self):
-        pass
+        headers_1 = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1a
+        }
 
-    def test_delete_no_writers(self):
-        pass 
+        headers_2 = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1b
+        }
+
+        # validate post request
+        response = self.client.post(reverse('writer-permission'), headers=headers_1, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # confirm delete request fails
+        response = self.client.delete(reverse('writer-permission'), headers=headers_2, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        expected_error_message = "Remove failed, current microservice has no writer permissions."
+        self.assertEqual(response.data["error"], expected_error_message)
+
+        # confirm editor token still exists:
+        response = self.client.get(reverse('writer-permission'), headers=headers_1, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["editor_token"], str(self.TEST_MS_TOKEN_1a))
+
+    def test_delete_not_initialized(self):
+        headers = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1a
+        }
+
+        # confirm delete request fails
+        response = self.client.delete(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        expected_error_message = "Writer permissions has not been initialized for current project"
+        self.assertEqual(response.data["error"], expected_error_message)
+
+        # confirm editor token is still empty:
+        response = self.client.get(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        expected_error_message = "Current project has not initialized reader/writer permissions yet."
+        self.assertEqual(response.data["error"], expected_error_message)
+
+    def test_multiple_deletes(self):
+        headers = {
+            'Microservice-Token': self.TEST_MS_TOKEN_1a
+        }
+
+        # validate post request
+        response = self.client.post(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # validate delete request
+        response = self.client.delete(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["project"], str(self.TEST_PROJECT_TOKEN_1))
+
+        # validate second delete request fails
+        response = self.client.delete(reverse('writer-permission'), headers=headers, format='json')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        expected_error_message = "Remove failed, no existing editor token found for project"
+        self.assertEqual(response.data["error"], expected_error_message)
