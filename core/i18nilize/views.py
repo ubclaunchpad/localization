@@ -492,7 +492,7 @@ class WriterPermissionView(APIView):
         
         project_token = microservice_token.project_token
 
-        # check if a Writer record already exists for this project
+        # check if a Writer record exists for this project
         writer_permission = Writer.objects.filter(project_token=project_token).first()
         if writer_permission:
             data = {
@@ -504,7 +504,7 @@ class WriterPermissionView(APIView):
         # reader/writer permissions not initialized for current project
         else:
             return Response(
-                {"message": "Current project has not initialized reader/writer permissions yet."},
+                {"error": "Current project has not initialized reader/writer permissions yet."},
                 status=status.HTTP_404_NOT_FOUND
             )
 
