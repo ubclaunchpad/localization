@@ -2,4 +2,6 @@ env/
 **/__pycache__
 myenv
 venv
-i18nilize.egg-info
+**/*.egg-info
+**/diff_state
+**/test_directory_do_not_commit
