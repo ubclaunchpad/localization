@@ -7,6 +7,10 @@ class MSGlobalToken:
     def __init__(self):
         self.value = ""
 
+# Directory values are set dynamically on startup in command_line.py
+ROOT_DIRECTORY = ""
+LANGUAGES_DIR = ""
+
 API_BASE_URL = "http://localhost:8000/api/"
 
 TOKEN_ENDPOINT = f"{API_BASE_URL}token/"
