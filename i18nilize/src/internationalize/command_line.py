@@ -1,17 +1,18 @@
 import argparse
+
 from . import globals
 from .helpers import (
     add_language,
     add_update_translated_word,
     delete_translation,
 )
-from .diffing_processor import DiffingProcessor
 from .package_init_utils import (
     initialize_root_directory,
     setup_package,
     validate_required_directories,
 )
 from .sync_processor import pull_translations, push_translations
+from .diffing_processor import DiffingProcessor
 
 
 def cli():
