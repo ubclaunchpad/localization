@@ -13,6 +13,7 @@ from .package_init_utils import (
 )
 from .sync_processor import pull_translations, push_translations
 from .diffing_processor import DiffingProcessor
+from .api_helpers import relinquish_writer_permissions
 
 
 def cli():
@@ -53,6 +54,9 @@ def cli():
     # sub parser for setup
     subparsers.add_parser("setup")
 
+    # sub parser for relinquishing writer permissions
+    subparsers.add_parser("relinquish-writer")
+
     # the subparser is used because different CLIs use a different amount of inputs
 
     args = parser.parse_args()
@@ -76,6 +80,8 @@ def cli():
         pull_translations()
     elif args.command == "push":
         push_translations()
+    elif args.command == "relinquish-writer":
+        relinquish_writer_permissions()
     else:
         print("Invalid command.")
 
