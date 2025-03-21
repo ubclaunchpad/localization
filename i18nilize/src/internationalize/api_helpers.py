@@ -89,3 +89,34 @@ def has_writer_permissions(ms_token):
 
     except requests.RequestException as e:
         raise Exception(f"HTTP Request failed: {e}")
+    
+def relinquish_writer_permissions():
+    """
+    Relinquishes writer permissions for the current microservice token.
+    """
+    ms_token = globals.ms_token.value
+    if not ms_token:
+        print("Microservice token not found. No permissions to relinquish.")
+        return False
+    
+    try:
+        response = requests.delete(
+            globals.WRITER_PERMISSIONS_ENDPOINT, 
+            headers={'Microservice-Token': ms_token}
+        )
+        
+        if response.status_code == 200:
+            print("Writer permissions relinquished successfully.")
+            return True
+        elif response.status_code == 404:
+            print("Error: No writer permissions found for this project.")
+            return False
+        elif response.status_code == 400:
+            print("Error: Current microservice does not have writer permissions.")
+            return False
+        else:
+            print(f"Error: Failed to relinquish writer permissions. Status code: {response.status_code}")
+            return False
+    except requests.RequestException as e:
+        print(f"HTTP Request failed: {e}")
+        return False
