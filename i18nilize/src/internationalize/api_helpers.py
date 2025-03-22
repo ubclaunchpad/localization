@@ -120,3 +120,38 @@ def relinquish_writer_permissions():
     except requests.RequestException as e:
         print(f"HTTP Request failed: {e}")
         return False
+    
+def request_writer_permissions():
+    """
+    Requests permissions to modify shared translations
+    """
+    ms_token = globals.ms_token.value
+    if not ms_token:
+        print("Error: Microservice Token is null.")
+        return False
+    
+    try:
+        response = requests.post(
+            globals.WRITER_PERMISSIONS_ENDPOINT, 
+            headers={"Microservice-Token": ms_token}
+        )
+
+        if response.status_code == 200 or response.status_code == 201:
+            print("Writer permission granted.")
+            return True
+        elif response.status_code == 400:
+            print("No valid microservice token.")
+            return False
+        elif response.status_code == 404:
+            print("WMicroservice token not found.")
+            return False
+        elif response.status_code == 403:
+            print("Writer permissions already granted to another microservice.")
+            return False
+        else:
+            print(f"Error: Failed to request writer permissions. Status code: {response.status_code}")
+            return False
+    except requests.RequestException as e:
+        print(f"HTTP Request failed: {e}")
+        return False
+
