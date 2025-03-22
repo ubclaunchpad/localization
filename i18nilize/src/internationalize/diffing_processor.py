@@ -5,6 +5,7 @@ import os
 from dirsync import sync
 
 from src.internationalize.error_handler import ErrorHandler
+from src.internationalize.api_helpers import create_ms_token
 from src.internationalize.helpers import compute_hashes, read_json_file
 
 from . import globals
@@ -37,6 +38,8 @@ class DiffingProcessor:
     """
 
     def setup(self):
+        ms_token = create_ms_token()
+        
         try:
             if not os.path.exists(self.diff_state_root_dir):
                 os.mkdir(self.diff_state_root_dir)
