@@ -37,8 +37,9 @@ class DiffingProcessor:
     Initializes the old state of translations when package is first installed.
     """
 
-    def setup(self):
-        ms_token = create_ms_token()
+    def setup(self, create_ms_token=True):
+        if create_ms_token:
+            create_ms_token()
         
         try:
             if not os.path.exists(self.diff_state_root_dir):
