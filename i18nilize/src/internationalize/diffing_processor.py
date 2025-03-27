@@ -5,6 +5,7 @@ import os
 from dirsync import sync
 
 from src.internationalize.error_handler import ErrorHandler
+from src.internationalize.api_helpers import create_ms_token
 from src.internationalize.helpers import compute_hashes, read_json_file
 
 from . import globals
@@ -36,7 +37,10 @@ class DiffingProcessor:
     Initializes the old state of translations when package is first installed.
     """
 
-    def setup(self):
+    def setup(self, create_ms_token_flag=True):
+        if create_ms_token_flag:
+            create_ms_token()
+        
         try:
             if not os.path.exists(self.diff_state_root_dir):
                 os.mkdir(self.diff_state_root_dir)
