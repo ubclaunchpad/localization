@@ -162,7 +162,7 @@ class TestDiffing(unittest.TestCase):
 
         # Initialize translations
         self.util.initialize_test_data(initial_data_location)
-        self.dp.setup()
+        self.dp.setup(create_ms_token_flag=False)
 
         # Modify translations
         self.util.initialize_test_data(modified_data_location)
