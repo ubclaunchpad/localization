@@ -60,7 +60,7 @@ class TestDiffing(unittest.TestCase):
         self.util.initialize_test_data(self.basic_initial_data_location)
 
         # initialize diffing processor
-        self.dp.setup(create_ms_token=False)
+        self.dp.setup(create_ms_token_flag=False)
 
     # tear down diffing folder
     def tearDown(self):

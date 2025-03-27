@@ -37,8 +37,8 @@ class DiffingProcessor:
     Initializes the old state of translations when package is first installed.
     """
 
-    def setup(self, create_ms_token=True):
-        if create_ms_token:
+    def setup(self, create_ms_token_flag=True):
+        if create_ms_token_flag:
             create_ms_token()
         
         try:
