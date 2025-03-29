@@ -29,10 +29,10 @@ dependencies = [
 i18nilize = "src.internationalize.command_line:cli"
 
 [tool.setuptools]
-packages = ["src"]
+package-dir = {"" = "src"}
 
-[tool.setuptools.package-dir]
-src = "src"
+# [tool.setuptools.package-dir]
+# internationalize = "src/*"
 
 # [tool.setuptools.packages.find]
 # where = ["src"]
