@@ -1,13 +1,32 @@
 import unittest
+import os
+import json
+import shutil
 from unittest.mock import patch
-from internationalize.localize import Localize
+from src.internationalize.localize import Localize
+
+from src.internationalize import globals
 
 # to test:
 # in i18nilize directory, run python -m tests.test_localize
 
 class TestLocalize(unittest.TestCase):
     def setUp(self):
+        print("LANGUAGES_DIR: ", globals.LANGUAGES_DIR)
+        os.makedirs(globals.LANGUAGES_DIR, exist_ok=True)
+
+        spanish = { "hello": "hola", "thanks": "gracias" }
+        french = { "hello": "bonjour", "thanks": "merci" }
+
+        for [language, translations] in [("spanish", spanish), ("french", french)]:
+            with open(os.path.join(globals.LANGUAGES_DIR, f"{language}.json"), "w+") as file:
+                json.dump(translations, file)
+
         Localize.translations_map = {}
+
+    # def tearDown(self):
+    #     if os.path.exists(globals.LANGUAGES_DIR):
+    #         shutil.rmtree(globals.LANGUAGES_DIR)
 
     @patch("os.path.exists")
     def test_load_language_already_in_map(self, mock_path_exists):

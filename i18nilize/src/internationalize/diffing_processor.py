@@ -4,8 +4,8 @@ import os
 
 from dirsync import sync
 
-from internationalize.error_handler import ErrorHandler
-from internationalize.helpers import compute_hashes, read_json_file
+from .error_handler import ErrorHandler
+from .helpers import compute_hashes, read_json_file
 
 from . import globals
 

@@ -9,8 +9,8 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 if project_root not in sys.path:
     sys.path.append(project_root)
 
-from internationalize.api_helpers import create_token, fetch_translation_data
-from internationalize.globals import token 
+from src.internationalize.api_helpers import create_token, fetch_translation_data
+from src.internationalize.globals import token 
 
 #class TestAPIHelpers(unittest.TestCase): this test is broken so we'll ignore it for now
 class TestAPIHelpers():

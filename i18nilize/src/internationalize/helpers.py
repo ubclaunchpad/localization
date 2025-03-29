@@ -4,7 +4,7 @@ import os
 import hashlib
 import requests
 from . import globals
-from internationalize.error_handler import ErrorHandler
+from .error_handler import ErrorHandler
 
 # Function to parse json file, given its path
 def get_json(file_path):

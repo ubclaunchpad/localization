@@ -4,8 +4,8 @@ import os
 import shutil
 import unittest
 
-from internationalize import globals
-from internationalize.diffing_processor import (
+from src.internationalize import globals
+from src.internationalize.diffing_processor import (
     DiffingProcessor,
     compute_hashes,
     read_json_file,

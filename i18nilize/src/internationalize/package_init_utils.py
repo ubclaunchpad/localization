@@ -1,19 +1,7 @@
 import os
 
-from internationalize import globals
-from internationalize.diffing_processor import DiffingProcessor
-from internationalize.project_root_utils import get_project_root_directory
-
-
-def initialize_root_directory():
-    try:
-        root_directory = get_project_root_directory()
-        globals.ROOT_DIRECTORY = root_directory
-        globals.LANGUAGES_DIR = os.path.join(root_directory, "languages")
-    except FileNotFoundError as err:
-        print("Error:", err)
-        exit(1)
-
+from . import globals
+from .diffing_processor import DiffingProcessor
 
 def setup_package():
     try:
