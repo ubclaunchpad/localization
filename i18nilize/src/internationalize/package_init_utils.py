@@ -1,8 +1,8 @@
 import os
 
-from src.internationalize import globals
-from src.internationalize.diffing_processor import DiffingProcessor
-from src.internationalize.project_root_utils import get_project_root_directory
+from internationalize import globals
+from internationalize.diffing_processor import DiffingProcessor
+from internationalize.project_root_utils import get_project_root_directory
 
 
 def initialize_root_directory():

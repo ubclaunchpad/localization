@@ -1,7 +1,7 @@
 import json
 import os
 import shutil
-from src.internationalize.diffing_processor import read_json_file
+from internationalize.diffing_processor import read_json_file
 
 class DiffingTestUtil():
     def __init__(self, test_directory):

@@ -1,17 +1,17 @@
 import argparse
 
-from src.internationalize import globals
-from src.internationalize.helpers import (
+from internationalize import globals
+from internationalize.helpers import (
     add_language,
     add_update_translated_word,
     delete_translation,
 )
-from src.internationalize.package_init_utils import (
+from internationalize.package_init_utils import (
     initialize_root_directory,
     setup_package,
     validate_required_directories,
 )
-from src.internationalize.sync_processor import pull_translations, push_translations
+from internationalize.sync_processor import pull_translations, push_translations
 
 
 def cli():

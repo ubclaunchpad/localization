@@ -4,8 +4,8 @@ import shutil
 import unittest
 from unittest.mock import patch
 
-from src.internationalize import globals
-from src.internationalize.helpers import (
+from internationalize import globals
+from internationalize.helpers import (
     add_language,
     add_update_translated_word,
     delete_translation,

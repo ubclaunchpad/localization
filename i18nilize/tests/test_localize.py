@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from src.internationalize.localize import Localize
+from internationalize.localize import Localize
 
 # to test:
 # in i18nilize directory, run python -m tests.test_localize
