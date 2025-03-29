@@ -176,6 +176,16 @@ def make_translation_map(data):
 def get_translation(translations_map, language):
     return translations_map.get(language, "Translation not found")
 
+# assign group token
+def assign_token(token):
+    globals.token = token
+    print("Group token successfully set to : ", globals.token)
+    
+# fetch group token 
+def fetch_token():
+    print("Group token is : ", globals.token)
+    return globals.token
+
 """
 Computes 256-bit hash for given content
 """
