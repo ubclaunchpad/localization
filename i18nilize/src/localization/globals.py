@@ -1,3 +1,8 @@
+import os
+
+from .project_root_utils import get_project_root_directory
+
+
 # Test Token: "c84234c3-b507-4ed0-a6eb-8b10116cdef1"
 class GlobalToken:
     def __init__(self):
@@ -15,4 +20,19 @@ PULL_TRANSLATIONS_ENDPOINT = f"{API_BASE_URL}/translations/pull/"
 PUSH_TRANSLATIONS_ENDPOINT = f"{API_BASE_URL}/translations/push/"
 
 
+def initialize_root_directory():
+    try:
+        root_directory = get_project_root_directory()
+
+        global ROOT_DIRECTORY, LANGUAGES_DIR
+
+        ROOT_DIRECTORY = root_directory
+        LANGUAGES_DIR = os.path.join(root_directory, "languages")
+
+    except FileNotFoundError as err:
+        print("Error:", err)
+        exit(1)
+
+
 token = GlobalToken()
+initialize_root_directory()

@@ -25,14 +25,12 @@ dependencies = [
     "dirsync>=2.2.5",
 ]
 
-[project.scripts]
-i18nilize = "src.internationalize.command_line:cli"
-
-[tool.setuptools]
-packages = ["src"]
 
 [tool.setuptools.package-dir]
-src = "src"
+"" = "src"
 
-# [tool.setuptools.packages.find]
-# where = ["src"]
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.scripts]
+i18nilize = "localization.command_line:cli"

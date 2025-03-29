@@ -1,10 +1,15 @@
 import json
 import os
 
+from . import globals
+
 
 class Localize:
-    languages_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "languages")
+    # languages_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "languages")
+    languages_dir = globals.LANGUAGES_DIR
     translations_map = {}
+
+    print("LANGUAGES_DIR:", languages_dir)
 
     @classmethod
     def load_language(cls, language):
@@ -25,4 +30,6 @@ class Localize:
         Get translation for a word in the specified language.
         """
         cls.load_language(language)
-        return cls.translations_map[language].get(word, f"Translation for {word} not found")
+        return cls.translations_map[language].get(
+            word, f"Translation for {word} not found"
+        )

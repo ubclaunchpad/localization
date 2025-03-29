@@ -1,1 +1,1 @@
-internationalize
+localization
