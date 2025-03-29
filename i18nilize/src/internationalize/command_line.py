@@ -5,6 +5,8 @@ from .helpers import (
     add_language,
     add_update_translated_word,
     delete_translation,
+    assign_token,
+    fetch_token
 )
 from .package_init_utils import (
     initialize_root_directory,
@@ -13,7 +15,7 @@ from .package_init_utils import (
 )
 from .sync_processor import pull_translations, push_translations
 from .diffing_processor import DiffingProcessor
-from .api_helpers import relinquish_writer_permissions, request_writer_permissions
+from .api_helpers import relinquish_writer_permissions, request_writer_permissions, create_token
 
 
 def cli():
@@ -44,6 +46,12 @@ def cli():
     delete_parser.add_argument("language")
     delete_parser.add_argument("original_word")
     delete_parser.add_argument("translated_word")
+
+    # sub parser for group token
+    group_token_assign_parser = subparsers.add_parser("group-assign")
+    group_token_assign_parser.add_argument("token")
+    group_token_create_parser = subparsers.add_parser("group-create")
+    group_token_fetch_parser = subparsers.add_parser("group-fetch")
 
     # sub parser for pull
     subparsers.add_parser("pull")
@@ -87,6 +95,14 @@ def cli():
         relinquish_writer_permissions()
     elif args.command == "request-writer":
         request_writer_permissions()
+
+    elif args.command == "group-assign":
+        assign_token(args.token)
+    elif args.command == "group-create":
+        create_token()
+    elif args.command == "group-fetch":
+        fetch_token()
+
     else:
         print("Invalid command.")
 
