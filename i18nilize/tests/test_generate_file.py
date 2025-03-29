@@ -10,7 +10,7 @@ class TestGenerateFile(unittest.TestCase):
     def setUp(self):
         self.TEST_TOKEN = '85124f79-0829-4b80-8b5c-d52700d86e46'
 
-    @patch('src.internationalize.helpers.requests.get')
+    @patch('internationalize.helpers.requests.get')
     def test_generate_file_success(self, mock_get):
         mock_response = Mock()
         mock_response.status_code = 200
@@ -30,7 +30,7 @@ class TestGenerateFile(unittest.TestCase):
             expected_content = json.dumps(mock_response.json.return_value, indent = 4)
             self.assertEqual(content, expected_content)
     
-    @patch('src.internationalize.helpers.requests.get')
+    @patch('internationalize.helpers.requests.get')
     def test_generate_file_error(self, mock_get):
         # Mock the response object
         mock_response = Mock()
