@@ -3,7 +3,7 @@ import os
 
 import requests
 
-from src.internationalize.diffing_processor import DiffingProcessor
+from .diffing_processor import DiffingProcessor
 
 from . import globals
 
