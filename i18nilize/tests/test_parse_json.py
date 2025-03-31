@@ -1,5 +1,5 @@
 import unittest, os, json, timeit
-from src.internationalize.helpers import get_json, make_translation_map, get_translation
+from ..src.internationalize.helpers import get_json, make_translation_map, get_translation
 
 # Create your tests here.
 class TestGetJson(unittest.TestCase):                

@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch, Mock
 import json
 import os
-from src.internationalize.helpers import generate_file
+from ..src.internationalize.helpers import generate_file
 
 # run tests using python -m tests.test_generate_file at i18nilize directory level
 

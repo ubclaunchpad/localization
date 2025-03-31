@@ -1,7 +1,7 @@
 import json
 import os
 import unittest
-from src.internationalize.error_handler import ErrorHandler
+from ..src.internationalize.error_handler import ErrorHandler
 
 class TestErrorHandler(unittest.TestCase):
     def setUp(self):

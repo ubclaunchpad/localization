@@ -4,13 +4,13 @@ import os
 import shutil
 import unittest
 
-from src.internationalize import globals
-from src.internationalize.diffing_processor import (
+from ..src.internationalize import globals
+from ..src.internationalize.diffing_processor import (
     DiffingProcessor,
     compute_hashes,
     read_json_file,
 )
-from tests.util.test_diffing_util import DiffingTestUtil
+from .util.test_diffing_util import DiffingTestUtil
 
 
 class TestDiffing(unittest.TestCase):

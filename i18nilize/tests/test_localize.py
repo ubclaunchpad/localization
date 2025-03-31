@@ -3,9 +3,9 @@ import os
 import json
 import shutil
 from unittest.mock import patch
-from src.internationalize.localize import Localize
+from ..src.internationalize.localize import Localize
 
-from src.internationalize import globals
+from ..src.internationalize import globals
 
 # to test:
 # in i18nilize directory, run python -m tests.test_localize
