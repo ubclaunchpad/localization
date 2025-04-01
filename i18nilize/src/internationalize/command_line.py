@@ -19,8 +19,6 @@ from .api_helpers import relinquish_writer_permissions, request_writer_permissio
 
 
 def cli():
-    initialize_root_directory()
-
     # initialize the parser
     parser = argparse.ArgumentParser(description="internationalization for translation")
     subparsers = parser.add_subparsers(dest="command")

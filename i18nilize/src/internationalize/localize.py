@@ -1,9 +1,10 @@
 import json
 import os
 
+from . import globals
 
 class Localize:
-    languages_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "languages")
+    languages_dir = globals.LANGUAGES_DIR
     translations_map = {}
 
     @classmethod

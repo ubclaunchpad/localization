@@ -4,9 +4,9 @@ import os
 
 from dirsync import sync
 
-from src.internationalize.error_handler import ErrorHandler
-from src.internationalize.api_helpers import create_ms_token
-from src.internationalize.helpers import compute_hashes, read_json_file
+from .error_handler import ErrorHandler
+from .api_helpers import create_ms_token
+from .helpers import compute_hashes, read_json_file
 
 from . import globals
 
