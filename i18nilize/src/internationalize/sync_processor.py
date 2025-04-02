@@ -1,12 +1,14 @@
 import json
 import os
+from dotenv import load_dotenv
 
 import requests
 
-from src.internationalize.diffing_processor import DiffingProcessor
+from .diffing_processor import DiffingProcessor
 
 from . import globals
 from .api_helpers import has_writer_permissions
+ENV_FILE_PATH = globals.ENV_FILE
 
 """
 Pulls all translations assigned to the microservices' token
@@ -15,7 +17,9 @@ and overwrites all language files to sync translations.
 
 
 def pull_translations():
-    token = globals.token.value
+    load_dotenv(ENV_FILE_PATH)
+    token = os.getenv("GROUP_TOKEN")
+    
     diff_processor = DiffingProcessor(globals.LANGUAGES_DIR)
 
     try:
@@ -44,8 +48,10 @@ Push all local translations to the API.
 
 
 def push_translations():
-    token = globals.token.value
-    ms_token = globals.ms_token.value
+    load_dotenv(ENV_FILE_PATH)
+    token = os.getenv("GROUP_TOKEN")
+
+    ms_token = os.getenv("MS_TOKEN")
 
     # make sure current microservice token has writer permissions
     if not has_writer_permissions(ms_token):
@@ -53,7 +59,7 @@ def push_translations():
         print(error_msg)
         return
 
-    diff_processor = DiffingProcessor(translations_dir)
+    diff_processor = DiffingProcessor(globals.LANGUAGES_DIR)
     changed_translations = diff_processor.get_changed_translations()
 
     for language in changed_translations:

@@ -2,35 +2,99 @@
 
 import requests
 from . import globals
-import sys
+from dotenv import load_dotenv
+import os
+from .helpers import (
+    write_env_var
+)
+
+ENV_FILE_PATH = globals.ENV_FILE
 
 def create_token():
     """
     Creates a new token by making a POST request to the central API.
+    stores the token in the .env file.
     """
     url = globals.TOKEN_ENDPOINT
     try:
         response = requests.post(url)
         if response.status_code == 201:
             token_value = response.json().get("value")
-            globals.token.value = token_value 
-            print("Token set.")
+
+            # Write it to .env
+            write_env_var("GROUP_TOKEN", token_value)
+
+            # Write it to globals
+            globals.token.value = token_value
+
+            print("Group Token set and saved to .env.")
         else:
             raise Exception(f"Failed to retrieve token. Status code: {response.status_code}")
     except requests.RequestException as e:
         raise Exception(f"HTTP Request failed: {e}")
     
+
+def assign_token(token):
+    """
+    Update a group token in .env and in the server.
+    """
+    # Save it to .env and globals
+    globals.token = token
+    write_env_var("GROUP_TOKEN", token)
+
+    load_dotenv(ENV_FILE_PATH)
+    ms_token = os.getenv("MS_TOKEN")
+
+    if not ms_token:
+        raise Exception("MS_TOKEN is not set in .env")
+
+    # PATCH URL now targets the existing microservice token
+    url = f"{globals.MS_TOKEN_ENDPOINT}{ms_token}/"
+
+    # We want to change the project_token to this new group token
+    payload = {
+        "project_token": token
+    }
+
+    try:
+        response = requests.patch(url, json=payload)
+
+        if response.status_code == 200:
+            print("Group token successfully updated to:", token)
+
+            # Optionally confirm the updated MS token still matches
+            globals.ms_token.value = ms_token
+        else:
+            raise Exception(f"Failed to update group token. Status code: {response.status_code}, Response: {response.text}")
+    except requests.RequestException as e:
+        raise Exception(f"HTTP Request failed: {e}")
+    
+
 def create_ms_token():
     """
     Creates a new microservice token by making a POST request to the central API.
+    Stores the token in the .env file.
     """
-    url = globals.MS_TOKEN_ENDPOINT
+    load_dotenv(ENV_FILE_PATH)
+    group_token = os.getenv("GROUP_TOKEN")
+
+    if not group_token:
+        raise Exception("GROUP_TOKEN is not set in .env")
+
+    url = f"{globals.MS_TOKEN_ENDPOINT}{group_token}/"
+
     try:
         response = requests.post(url)
         if response.status_code == 201:
             token_value = response.json().get("value")
-            globals.ms_token.value = token_value 
-            print("Microservice Token set.")
+
+            # Write it to .env
+            write_env_var("MS_TOKEN", token_value)
+
+            # Write it to globals
+            globals.ms_token.value = token_value
+
+            print("Microservice Token set and saved to .env.")
         else:
             raise Exception(f"Failed to retrieve token. Status code: {response.status_code}")
     except requests.RequestException as e:
@@ -40,11 +104,16 @@ def fetch_translation_data(language):
     """
     Fetches translation data for the specified language using the token.
     """
-    token = globals.token.value  
+
+    load_dotenv(ENV_FILE_PATH)
+    token = os.getenv("GROUP_TOKEN")
+
     if not token:
         print("Token not found. Creating a new token...")
         create_token()
-        token = globals.token.value
+        load_dotenv(ENV_FILE_PATH)
+        token = os.getenv("GROUP_TOKEN")
+
         if not token:
             raise Exception("Failed to create token.")
         
@@ -71,7 +140,7 @@ def fetch_translation_data(language):
 # else false
 def has_writer_permissions(ms_token):
     try:
-        response = requests.post(globals.WRITER_PERMISSIONS_ENDPOINT, headers={'Microservice-Token': ms_token})
+        response = requests.get(globals.WRITER_PERMISSIONS_ENDPOINT, headers={'Microservice-Token': ms_token})
 
         if response.status_code == 200:
             data = response.json()
@@ -94,7 +163,10 @@ def relinquish_writer_permissions():
     """
     Relinquishes writer permissions for the current microservice token.
     """
-    ms_token = globals.ms_token.value
+
+    load_dotenv(ENV_FILE_PATH)
+    ms_token = os.getenv("MS_TOKEN")
+
     if not ms_token:
         print("Microservice token not found. No permissions to relinquish.")
         return False
@@ -125,7 +197,10 @@ def request_writer_permissions():
     """
     Requests permissions to modify shared translations
     """
-    ms_token = globals.ms_token.value
+
+    load_dotenv(ENV_FILE_PATH)
+    ms_token = os.getenv("MS_TOKEN")
+    
     if not ms_token:
         print("Error: Microservice Token is null.")
         return False
@@ -143,7 +218,7 @@ def request_writer_permissions():
             print("No valid microservice token.")
             return False
         elif response.status_code == 404:
-            print("WMicroservice token not found.")
+            print("Microservice token not found.")
             return False
         elif response.status_code == 403:
             print("Writer permissions already granted to another microservice.")

@@ -5,22 +5,18 @@ from .helpers import (
     add_language,
     add_update_translated_word,
     delete_translation,
-    assign_token,
     fetch_token
 )
 from .package_init_utils import (
-    initialize_root_directory,
     setup_package,
     validate_required_directories,
 )
 from .sync_processor import pull_translations, push_translations
 from .diffing_processor import DiffingProcessor
-from .api_helpers import relinquish_writer_permissions, request_writer_permissions, create_token
+from .api_helpers import relinquish_writer_permissions, request_writer_permissions, create_token, assign_token
 
 
 def cli():
-    initialize_root_directory()
-
     # initialize the parser
     parser = argparse.ArgumentParser(description="internationalization for translation")
     subparsers = parser.add_subparsers(dest="command")

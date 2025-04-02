@@ -1,10 +1,36 @@
 import json
 import sys
 import os
+from dotenv import load_dotenv
 import hashlib
 import requests
 from . import globals
-from src.internationalize.error_handler import ErrorHandler
+from .error_handler import ErrorHandler
+
+ENV_FILE_PATH = globals.ENV_FILE
+
+# write to .env file in diff_state dir
+def write_env_var(key, value):
+    lines = []
+    found = False
+
+    try:
+        with open(ENV_FILE_PATH, "r") as f:
+            for line in f:
+                if line.startswith(f"{key}="):
+                    lines.append(f"{key}={value}\n")
+                    found = True
+                else:
+                    lines.append(line)
+    except FileNotFoundError:
+        pass
+
+    if not found:
+        lines.append(f"{key}={value}\n")
+
+    with open(ENV_FILE_PATH, "w") as f:
+        f.writelines(lines)
+
 
 # Function to parse json file, given its path
 def get_json(file_path):
@@ -175,16 +201,13 @@ def make_translation_map(data):
 # get translations from hashmap given the language
 def get_translation(translations_map, language):
     return translations_map.get(language, "Translation not found")
-
-# assign group token
-def assign_token(token):
-    globals.token = token
-    print("Group token successfully set to : ", globals.token)
     
 # fetch group token 
 def fetch_token():
-    print("Group token is : ", globals.token)
-    return globals.token
+    load_dotenv(ENV_FILE_PATH)
+    token = os.getenv("GROUP_TOKEN")
+    print("Group token is : ", token)
+    return token
 
 """
 Computes 256-bit hash for given content
