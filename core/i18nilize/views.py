@@ -70,6 +70,39 @@ class MSTokenView(APIView):
             'created_at': token.created_at.isoformat()
         }
         return Response(data, status=status.HTTP_201_CREATED)
+    
+    def patch(self, request, value=None):
+        """
+        Update the group token (project_token) for a microservice token.
+        """
+        if value is None:
+            return Response({'error': 'Token value is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        new_project_token_value = request.data.get("project_token")
+        if not new_project_token_value:
+            return Response({'error': 'New group token value is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            ms_token = MicroserviceToken.objects.get(value=value)
+        except MicroserviceToken.DoesNotExist:
+            return Response({'error': 'Microservice token not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            new_project_token = Token.objects.get(value=new_project_token_value)
+        except Token.DoesNotExist:
+            return Response({'error': 'New group token not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        ms_token.project_token = new_project_token
+        ms_token.save()
+
+        data = {
+            'id': ms_token.id,
+            'value': str(ms_token.value),
+            'group_token_value': str(ms_token.project_token.value),
+            'updated_at': ms_token.created_at.isoformat()  # You could also add a `modified_at` field
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
 
     def get(self, request, value=None):
         """

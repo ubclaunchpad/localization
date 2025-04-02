@@ -201,12 +201,6 @@ def make_translation_map(data):
 # get translations from hashmap given the language
 def get_translation(translations_map, language):
     return translations_map.get(language, "Translation not found")
-
-# assign group token
-def assign_token(token):
-    globals.token = token
-    write_env_var("GROUP_TOKEN", token)
-    print("Group token successfully set to : ", globals.token)
     
 # fetch group token 
 def fetch_token():

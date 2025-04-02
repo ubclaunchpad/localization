@@ -5,7 +5,6 @@ from .helpers import (
     add_language,
     add_update_translated_word,
     delete_translation,
-    assign_token,
     fetch_token
 )
 from .package_init_utils import (
@@ -14,7 +13,7 @@ from .package_init_utils import (
 )
 from .sync_processor import pull_translations, push_translations
 from .diffing_processor import DiffingProcessor
-from .api_helpers import relinquish_writer_permissions, request_writer_permissions, create_token
+from .api_helpers import relinquish_writer_permissions, request_writer_permissions, create_token, assign_token
 
 
 def cli():

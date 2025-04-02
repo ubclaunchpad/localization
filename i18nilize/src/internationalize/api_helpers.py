@@ -32,6 +32,43 @@ def create_token():
             raise Exception(f"Failed to retrieve token. Status code: {response.status_code}")
     except requests.RequestException as e:
         raise Exception(f"HTTP Request failed: {e}")
+    
+
+def assign_token(token):
+    """
+    Update a group token in .env and in the server.
+    """
+    # Save it to .env and globals
+    globals.token = token
+    write_env_var("GROUP_TOKEN", token)
+
+    load_dotenv(ENV_FILE_PATH)
+    ms_token = os.getenv("MS_TOKEN")
+
+    if not ms_token:
+        raise Exception("MS_TOKEN is not set in .env")
+
+    # PATCH URL now targets the existing microservice token
+    url = f"{globals.MS_TOKEN_ENDPOINT}{ms_token}/"
+
+    # We want to change the project_token to this new group token
+    payload = {
+        "project_token": token
+    }
+
+    try:
+        response = requests.patch(url, json=payload)
+
+        if response.status_code == 200:
+            print("Group token successfully updated to:", token)
+
+            # Optionally confirm the updated MS token still matches
+            globals.ms_token.value = ms_token
+        else:
+            raise Exception(f"Failed to update group token. Status code: {response.status_code}, Response: {response.text}")
+    except requests.RequestException as e:
+        raise Exception(f"HTTP Request failed: {e}")
+    
 
 def create_ms_token():
     """
