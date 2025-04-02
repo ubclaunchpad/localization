@@ -9,7 +9,6 @@ from .helpers import (
     fetch_token
 )
 from .package_init_utils import (
-    initialize_root_directory,
     setup_package,
     validate_required_directories,
 )
