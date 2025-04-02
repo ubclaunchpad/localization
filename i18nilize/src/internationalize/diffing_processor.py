@@ -5,7 +5,7 @@ import os
 from dirsync import sync
 
 from .error_handler import ErrorHandler
-from .api_helpers import create_ms_token
+from .api_helpers import create_token, create_ms_token
 from .helpers import compute_hashes, read_json_file
 
 from . import globals
@@ -26,21 +26,19 @@ class DiffingProcessor:
     def __init__(self, curr_translations_dir=None):
         logging.getLogger("dirsync").disabled = True
 
-        self.diff_state_root_dir = os.path.join(globals.ROOT_DIRECTORY, "diff_state")
+        self.diff_state_root_dir = globals.DIFF_STATE_DIR
         self.diff_state_files_dir = os.path.join(
             self.diff_state_root_dir, "translations"
         )
         self.metadata_file_dir = os.path.join(self.diff_state_root_dir, "metadata.json")
+        self.env_file_dir = globals.ENV_FILE
         self.curr_translation_files_dir = curr_translations_dir
 
     """
     Initializes the old state of translations when package is first installed.
     """
 
-    def setup(self, create_ms_token_flag=True):
-        if create_ms_token_flag:
-            create_ms_token()
-        
+    def setup(self, create_ms_token_flag=True, create_token_flag=True):      
         try:
             if not os.path.exists(self.diff_state_root_dir):
                 os.mkdir(self.diff_state_root_dir)
@@ -53,6 +51,16 @@ class DiffingProcessor:
 
             with open(self.metadata_file_dir, "w") as outfile:
                 json.dump({}, outfile)
+
+            with open(self.env_file_dir, "w") as f:
+                f.write("MS_TOKEN=\n")
+                f.write("GROUP_TOKEN=\n")
+
+            if create_token_flag:
+                create_token()
+
+            if create_ms_token_flag:
+                create_ms_token()
 
             # sync folders
             self.sync_translations()

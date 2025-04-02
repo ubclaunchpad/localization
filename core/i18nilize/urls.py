@@ -3,7 +3,7 @@ from .views import TokenView, MSTokenView, TranslationView, ProcessTranslationsV
 
 urlpatterns = [
     path('token/', TokenView.as_view(), name='create-token'),
-    path('ms-token/', MSTokenView.as_view(), name='create-ms-token'),
+    path('ms-token/<str:value>/', MSTokenView.as_view(), name='create-ms-token'),
     path('token/<str:value>/', TokenView.as_view(), name='read-token'),
     path('test/', TestTokenView.as_view(), name='test-token'),
     path('translation', TranslationView.as_view(), name='translation'),

@@ -48,14 +48,25 @@ class MSTokenView(APIView):
     Endpoint to create a new token or retrieve a token by its ID.
     """
 
-    def post(self, request):
+    def post(self, request, value=None):
         """
         Create a new token.
         """
-        token = MicroserviceToken.objects.create()
+        if value is None:
+            return Response({'error': 'Group token value is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            project_token = Token.objects.get(value=value)
+        except Token.DoesNotExist:
+            return Response({'error': 'Group token not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        token = MicroserviceToken.objects.create(project_token=project_token)
+
+
         data = {
             'id': token.id,
             'value': str(token.value),
+            'group_token_value': str(token.project_token),
             'created_at': token.created_at.isoformat()
         }
         return Response(data, status=status.HTTP_201_CREATED)
@@ -72,6 +83,7 @@ class MSTokenView(APIView):
             data = {
                 'id': token.id,
                 'value': str(token.value),
+                'group_token_value': str(token.project_token),
                 'created_at': token.created_at.isoformat()
             }
             return Response(data, status=status.HTTP_200_OK)
@@ -401,6 +413,9 @@ class WriterPermissionView(APIView):
             request.headers.get("Microservice-Token") or 
             request.data.get("microservice_token")
         )
+
+        print(microservice_token_value)
+
         if not microservice_token_value:
             return Response(
                 {"error": "Microservice token is required."},
@@ -425,6 +440,7 @@ class WriterPermissionView(APIView):
             )
         
         project_token = microservice_token.project_token
+        print(project_token)
 
         # check if a Writer record already exists for this project
         writer_permission = Writer.objects.filter(project_token=project_token).first()

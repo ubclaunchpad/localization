@@ -23,6 +23,7 @@ dependencies = [
     "geopy>=2.2.0",
     "Babel>=2.9.1",
     "dirsync>=2.2.5",
+    "python-dotenv>=1.0.0"
 ]
 
 [project.scripts]
